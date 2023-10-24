@@ -14,9 +14,10 @@ import 'package:project/utils/color.constants.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:iconly/iconly.dart';
+import 'package:project/view/noification_page.dart';
 import 'package:zoom_tap_animation/zoom_tap_animation.dart';
 
-import 'controller/bands_controller.dart';
+// import 'controller/bands_controller.dart';
 
 // import 'controller/tabbar_controller.dart';
 
@@ -48,6 +49,7 @@ class _MainWrapperState extends State<MainWrapper> {
   // final TabBarController _tabBarController = Get.put(TabBarController());
   @override
   Widget build(BuildContext context) {
+    final BandService bandService = Get.find<BandService>();
     return Scaffold(
       appBar: AppBar(
         // centerTitle: true,
@@ -55,13 +57,45 @@ class _MainWrapperState extends State<MainWrapper> {
         toolbarHeight: double.parse("70"),
         // elevation: 5,
         actions: [
-          IconButton(
-            onPressed: () {},
-            icon: const Icon(
-              IconlyBold.notification,
-            ),
-            splashColor: Colors.transparent, // สีเมื่อถูกแตะ
-            highlightColor: Colors.transparent,
+          Stack(
+            alignment: Alignment.center,
+            children: [
+              // color: Colors.amber,
+              IconButton(
+                onPressed: () {
+                  Get.to(
+                    const NotificationPage(),
+                    transition: Transition.upToDown,
+                  );
+                },
+                icon: const Icon(
+                  IconlyBold.notification,
+                ),
+                splashColor: Colors.transparent, // สีเมื่อถูกแตะ
+                highlightColor: Colors.transparent,
+              ),
+
+              Positioned(
+                right: 5, // Adjust the position as needed
+                top: 10, // Adjust the position as needed
+                child: Container(
+                    height: 20.0,
+                    width: 20.0,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(15),
+                      color: Colors.white,
+                    ),
+                    child: Center(
+                        child: Obx(() => Text(
+                              bandService.notificationController.notis.length
+                                  .toString(), // Replace with your desired number
+                              style: TextStyle(
+                                color: ColorConstants.appColors, // Text color
+                                fontWeight: FontWeight.bold,
+                              ),
+                            )))),
+              ),
+            ],
           ),
           IconButton(
             onPressed: () {
@@ -99,7 +133,13 @@ class _MainWrapperState extends State<MainWrapper> {
           padding: const EdgeInsets.symmetric(horizontal: 35, vertical: 15),
           child: Obx(
             () => Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              mainAxisAlignment:
+                  (bandService.profileController.profileList.isNotEmpty &&
+                          bandService.profileController.profileList[0]
+                                  .userPosition !=
+                              "none")
+                      ? MainAxisAlignment.spaceBetween
+                      : MainAxisAlignment.spaceAround,
               children: [
                 _bottomAppBarItem(
                   context,
@@ -107,17 +147,21 @@ class _MainWrapperState extends State<MainWrapper> {
                   page: 0,
                   label: "Home",
                 ),
+                //  Spacer(),  // Use Spacer to distribute space evenly
+                if (bandService.profileController.profileList.isNotEmpty &&
+                    bandService.profileController.profileList[0].userPosition !=
+                        "none")
+                  _bottomAppBarItem(
+                    context,
+                    icon: IconlyLight.user_1,
+                    page: 1,
+                    label: "Band",
+                  ),
                 _bottomAppBarItem(
                   context,
-                  icon: IconlyLight.user_1,
-                  page: 1,
-                  label: "Band",
-                ),
-                _bottomAppBarItem(
-                  context,
-                  icon: IconlyLight.chat,
+                  icon: IconlyLight.search,
                   page: 2,
-                  label: "Message",
+                  label: "Search",
                 ),
                 _bottomAppBarItem(
                   context,

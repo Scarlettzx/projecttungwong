@@ -7,6 +7,7 @@ import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 import 'package:iconly/iconly.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:modal_progress_hud_nsn/modal_progress_hud_nsn.dart';
 
 import '../controller/bands_controller.dart';
@@ -120,6 +121,7 @@ class _CreateBandState extends State<CreateBand> {
             bandService.bandsController.bandid.value =
                 jsonRes['data']['createBandResults']['band_id'];
             print(bandService.bandsController.bandid.value);
+            await bandService.profileController.getProfile();
             await bandService.bandsController.showMemberInBand();
             // ! redirect
             if (mounted) {
@@ -137,7 +139,6 @@ class _CreateBandState extends State<CreateBand> {
           }
           // }
         } else if (rs.statusCode == 409) {
-          print('498');
           switch (jsonRes['message']) {
             // !  มีชื่อวงนี้อยู่ใน DB Table Bands อยู่แล้ว
             case "band is already":
@@ -220,6 +221,10 @@ class _CreateBandState extends State<CreateBand> {
       },
       child: ModalProgressHUD(
         inAsyncCall: _saving,
+        progressIndicator: LoadingAnimationWidget.bouncingBall(
+          size: 50,
+          color: ColorConstants.appColors,
+        ),
         child: Scaffold(
           appBar: AppBar(
             backgroundColor: Colors.transparent,
@@ -349,68 +354,6 @@ class _CreateBandState extends State<CreateBand> {
                           ),
                         ),
                       ),
-                      // // !Postion
-                      // Padding(
-                      //   padding: const EdgeInsets.symmetric(horizontal: 25.0),
-                      //   child: DropdownButtonFormField(
-                      //     menuMaxHeight: 700,
-                      //     style: TextStyle(
-                      //       color: ColorConstants.gray600,
-                      //     ),
-                      //     // autofocus: true,
-                      //     icon: Icon(
-                      //       Icons.arrow_drop_down_circle,
-                      //       color: ColorConstants.appColors,
-                      //     ),
-                      //     // value: selectedValue,
-                      //     decoration: InputDecoration(
-                      //       hintText: "Select Position",
-                      //       hintStyle: const TextStyle(
-                      //           color: Color.fromARGB(255, 192, 192, 192)),
-                      //       fillColor: const Color.fromARGB(255, 237, 237, 237),
-                      //       filled: true,
-                      //       prefixIcon: const Icon(
-                      //         Icons.api,
-                      //         color: Color(0xFFB3B3B3),
-                      //       ),
-                      //       border: OutlineInputBorder(
-                      //         borderSide: BorderSide.none,
-                      //         borderRadius: BorderRadius.circular(25),
-                      //       ),
-                      //       focusedBorder: OutlineInputBorder(
-                      //         borderSide: const BorderSide(
-                      //           color: Color.fromARGB(255, 52, 230, 168),
-                      //           width: 3,
-                      //         ),
-                      //         borderRadius: BorderRadius.circular(25),
-                      //       ),
-                      //     ),
-                      //     value: selectedValuePosition,
-                      //     items: <String>[
-                      //       'none',
-                      //       'Guitar',
-                      //       'Drum',
-                      //       'Vocal',
-                      //       'Bass',
-                      //       'Piano'
-                      //     ].map<DropdownMenuItem<String>>((String value) {
-                      //       return DropdownMenuItem<String>(
-                      //           value: value,
-                      //           child: Text(
-                      //             value,
-                      //           ));
-                      //     }).toList(),
-                      //     onChanged: (String? value) {
-                      //       setState(() {
-                      //         selectedValuePosition = value;
-                      //         print(selectedValuePosition);
-                      //       });
-                      //     },
-                      //   ),
-                      // ),
-                      // const SizedBox(height: 20),
-                      // // ! EMAIL
-
                       const SizedBox(height: 30),
                       // borderRadius: BorderRadius.all(Radius.circular(25)),
                       // ! buttonอันเก่า

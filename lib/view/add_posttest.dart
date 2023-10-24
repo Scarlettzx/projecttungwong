@@ -175,8 +175,9 @@ class _AddPostTestState extends State<AddPostTest> {
   }
 
   _loadData() async {
+    setState(() {}); // รีเรนเดอร์หน้าจอ
     await _postsController.getPosts();
-    // setState(() {}); // รีเรนเดอร์หน้าจอ
-    // print(_postsController.posts.length);
+    // _postsController.update_displaypost();
+    print(_postsController.posts.length);
   }
 }

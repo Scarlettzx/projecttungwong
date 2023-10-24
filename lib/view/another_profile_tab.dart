@@ -1,16 +1,22 @@
 // import 'dart:ffi';
 //
 
+import 'dart:convert';
+import 'package:http/http.dart' as http;
+import 'package:awesome_snackbar_content/awesome_snackbar_content.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:http/src/response.dart';
 import 'package:iconly/iconly.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
+import 'package:modal_progress_hud_nsn/modal_progress_hud_nsn.dart';
 import 'package:page_transition/page_transition.dart';
 import 'package:project/controller/poststest_controller.dart';
 import 'package:project/view/post_tab.dart';
 import 'package:project/view/showfollowers.dart';
 import 'package:project/view/showsfollowers.dart';
 import 'package:project/view/testpost.dart';
+import '../controller/main_wrapper_controller.dart';
 import '../controller/posts_controller.dart';
 import '../controller/profile_controller.dart';
 // import '../data/models/post_model.dart';
@@ -20,17 +26,9 @@ import '../utils/config.dart';
 
 class AnotherProfileTab extends StatefulWidget {
   final int anotherpofileid;
-  // final String userName;
-  // final String userPosition;
-  // final String userCountry;
-  // final String userAvatar;
 
   const AnotherProfileTab({
     Key? key,
-    // required this.userAvatar,
-    // required this.userName,
-    // required this.userPosition,
-    // required this.userCountry,
     required this.anotherpofileid,
   }) : super(key: key);
 
@@ -39,11 +37,19 @@ class AnotherProfileTab extends StatefulWidget {
 }
 
 class _AnotherProfileTabState extends State<AnotherProfileTab> {
+  final MainWrapperController _mainWrapperController =
+      Get.find<MainWrapperController>();
   final BandService bandService = Get.find();
   final PoststestController _postsController = Get.find<PoststestController>();
+  late bool checkbutton = false;
+  late bool checkbuttoninvite = false;
+  // late bool checkbuttonemail = false;
+  // bool _saving = false;
   @override
   void initState() {
     super.initState();
+    print("bandService.profileController.profileList[0]");
+    print(bandService.profileController.profileList[0].bandType);
     print(widget.anotherpofileid);
     print(bandService.profileController.profileid.value);
     print("bandService.profileController.anotherprofileid.value");
@@ -60,6 +66,72 @@ class _AnotherProfileTabState extends State<AnotherProfileTab> {
   _loadDataPost() async {
     _postsController.getPosts();
     print(_postsController.posts.length);
+  }
+
+  checkButtoninvite() {
+    final isBand = bandService.bandsController.isBand.value;
+    final anotherProfileType =
+        bandService.profileController.anotherProfileType.value;
+    final profileid = bandService.profileController.profileid.value;
+    final anotherprofileid =
+        bandService.profileController.anotherprofileid.value;
+    final bandid = bandService.bandsController.bandid.value;
+    final bandType = bandService.profileController.profileList[0].bandType;
+    if (anotherProfileType == "user" &&
+        (bandService.profileController.useranotherprofile[0].userPosition ==
+                "none" ||
+            bandService.profileController.useranotherprofile[0].userIsAdmin ==
+                "true")) {
+      return false;
+    } else {
+      if (bandType == '2') {
+        if (isBand) {
+          if (anotherProfileType == "user" &&
+              profileid != anotherprofileid &&
+              bandService.profileController.useranotherprofile[0].bandType ==
+                  '0') {
+            return true;
+          } else if (anotherProfileType == "band" &&
+              bandid != anotherprofileid) {
+            return false;
+          }
+        } else {
+          if (anotherProfileType == "user" &&
+              profileid != anotherprofileid &&
+              bandService.profileController.useranotherprofile[0].bandType ==
+                  '0') {
+            return true;
+          } else if (anotherProfileType == "band" &&
+              bandid != anotherprofileid) {
+            return false;
+          }
+        }
+      }
+    }
+    return false;
+  }
+
+  checkButton() async {
+    switch (bandService.bandsController.isBand.value) {
+      case true:
+        if (bandService.bandsController.bandid.value ==
+                bandService.profileController.anotherprofileid.value ||
+            bandService.profileController.profileid.value ==
+                bandService.profileController.anotherprofileid.value) {
+          return checkbutton = false;
+        } else {
+          return checkbutton = true;
+        }
+      case false:
+        if (bandService.profileController.profileid.value ==
+                bandService.profileController.anotherprofileid.value ||
+            bandService.bandsController.bandid.value ==
+                bandService.profileController.anotherprofileid.value) {
+          return checkbutton = false;
+        } else {
+          return checkbutton = true;
+        }
+    }
   }
 
   @override
@@ -113,7 +185,7 @@ class _AnotherProfileTabState extends State<AnotherProfileTab> {
                               height: 22,
                             ),
                             Container(
-                              height: height * 0.43,
+                              height: height * 0.5,
                               child: LayoutBuilder(
                                 builder: (context, constraints) {
                                   double innerHeight = constraints.maxHeight;
@@ -145,15 +217,19 @@ class _AnotherProfileTabState extends State<AnotherProfileTab> {
                                                 height: 80,
                                               ),
                                               Text(
-                                                bandService.profileController
-                                                    .profileList[0].userName,
+                                                bandService
+                                                    .profileController
+                                                    .useranotherprofile[0]
+                                                    .userName,
                                                 style: TextStyle(
                                                   fontSize: 25,
                                                 ),
                                               ),
                                               Text(
-                                                bandService.profileController
-                                                    .profileList[0].userCountry,
+                                                bandService
+                                                    .profileController
+                                                    .useranotherprofile[0]
+                                                    .userCountry,
                                                 style: TextStyle(
                                                   fontSize: 15,
                                                 ),
@@ -161,8 +237,17 @@ class _AnotherProfileTabState extends State<AnotherProfileTab> {
                                               Text(
                                                 bandService
                                                     .profileController
-                                                    .profileList[0]
+                                                    .useranotherprofile[0]
                                                     .userPosition,
+                                                style: TextStyle(
+                                                  fontSize: 15,
+                                                ),
+                                              ),
+                                              Text(
+                                                bandService
+                                                    .profileController
+                                                    .useranotherprofile[0]
+                                                    .bandType,
                                                 style: TextStyle(
                                                   fontSize: 15,
                                                 ),
@@ -300,92 +385,158 @@ class _AnotherProfileTabState extends State<AnotherProfileTab> {
                                                     MainAxisAlignment.center,
                                                 children: [
                                                   Obx(() {
-                                                    // final bool
-                                                    //     shouldShowButton =
-                                                    //     widget.anotherpofileid !=
-                                                    //         bandService
-                                                    //             .profileController
-                                                    //             .profileid
-                                                    //             .value;
-                                                    // return Visibility(
-                                                    //   visible: shouldShowButton,
-                                                    return ElevatedButton(
-                                                      style: ButtonStyle(
-                                                        padding:
-                                                            MaterialStateProperty
-                                                                .all<
-                                                                    EdgeInsets>(
-                                                          const EdgeInsets
-                                                              .symmetric(
-                                                            horizontal: 20.0,
+                                                    checkButton(); // เรียก checkButton เพื่ออัพเดตค่า checkbutton
+                                                    final showFollowButton =
+                                                        checkbutton;
+                                                    return Visibility(
+                                                      visible: showFollowButton,
+                                                      child: ElevatedButton(
+                                                        style: ButtonStyle(
+                                                          padding:
+                                                              MaterialStateProperty
+                                                                  .all<
+                                                                      EdgeInsets>(
+                                                            const EdgeInsets
+                                                                .symmetric(
+                                                              horizontal: 20.0,
+                                                            ),
+                                                          ),
+                                                          backgroundColor:
+                                                              MaterialStateProperty
+                                                                  .all<Color>(
+                                                            bandService
+                                                                    .profileController
+                                                                    .isFollowing
+                                                                    .value
+                                                                ? ColorConstants
+                                                                    .unfollow
+                                                                : ColorConstants
+                                                                    .appColors,
+                                                          ),
+                                                          foregroundColor:
+                                                              MaterialStateProperty
+                                                                  .all<Color>(
+                                                            Colors.white,
                                                           ),
                                                         ),
-                                                        backgroundColor:
-                                                            MaterialStateProperty
-                                                                .all<Color>(
+                                                        onPressed: () {
+                                                          if (bandService
+                                                              .profileController
+                                                              .isFollowing
+                                                              .value) {
+                                                            //! ถ้ากำลัง Following ให้ทำ Unfollow
+                                                            //! ทำการ Unfollow ที่นี่
+                                                            bandService
+                                                                .profileController
+                                                                .doUnfollow();
+                                                          } else {
+                                                            //! ถ้าไม่ได้ Following ให้ทำ Follow
+                                                            bandService
+                                                                .profileController
+                                                                .dofollow();
+                                                            // profileController.toggleFollow();
+                                                          }
+                                                        },
+                                                        child: Text(
                                                           bandService
                                                                   .profileController
                                                                   .isFollowing
                                                                   .value
-                                                              ? ColorConstants
-                                                                  .unfollow
-                                                              : ColorConstants
-                                                                  .appColors,
+                                                              ? 'Unfollow'
+                                                              : 'Follow',
                                                         ),
-                                                        foregroundColor:
-                                                            MaterialStateProperty
-                                                                .all<Color>(
-                                                          Colors.white,
-                                                        ),
-                                                      ),
-                                                      onPressed: () {
-                                                        if (bandService
-                                                            .profileController
-                                                            .isFollowing
-                                                            .value) {
-                                                          //! ถ้ากำลัง Following ให้ทำ Unfollow
-                                                          //! ทำการ Unfollow ที่นี่
-                                                          bandService
-                                                              .profileController
-                                                              .doUnfollow();
-                                                        } else {
-                                                          //! ถ้าไม่ได้ Following ให้ทำ Follow
-                                                          bandService
-                                                              .profileController
-                                                              .dofollow();
-                                                          // profileController.toggleFollow();
-                                                        }
-                                                      },
-                                                      child: Text(
-                                                        bandService
-                                                                .profileController
-                                                                .isFollowing
-                                                                .value
-                                                            ? 'Unfollow'
-                                                            : 'Follow',
                                                       ),
                                                     );
-                                                    // );
                                                   }),
                                                   const SizedBox(
                                                     width: 20,
                                                   ),
-                                                  ElevatedButton(
-                                                    style: ButtonStyle(
-                                                      padding:
-                                                          MaterialStateProperty
-                                                              .all<EdgeInsets>(
-                                                        const EdgeInsets
-                                                            .symmetric(
-                                                          horizontal: 20.0,
+                                                  Obx(() {
+                                                    final notificationController =
+                                                        bandService
+                                                            .notificationController;
+                                                    final isVisible =
+                                                        checkButtoninvite() &&
+                                                            !notificationController
+                                                                .isInvited
+                                                                .value;
+
+                                                    return Visibility(
+                                                      visible: isVisible,
+                                                      child: ElevatedButton(
+                                                        style: ButtonStyle(
+                                                          padding:
+                                                              MaterialStateProperty
+                                                                  .all<
+                                                                      EdgeInsets>(
+                                                            const EdgeInsets
+                                                                .symmetric(
+                                                              horizontal: 20.0,
+                                                            ),
+                                                          ),
                                                         ),
+                                                        onPressed: () async {
+                                                          await doInviteband(
+                                                              context);
+                                                        },
+                                                        child: const Text(
+                                                            "Invite"),
                                                       ),
-                                                    ),
-                                                    onPressed: () {
-                                                      // Handle button click
-                                                    },
-                                                    child: const Text("Invite"),
+                                                    );
+                                                  }),
+                                                  const SizedBox(
+                                                    width: 20,
                                                   ),
+                                                  Obx(() {
+                                                    if (bandService
+                                                            .profileController
+                                                            .profileList
+                                                            .isNotEmpty &&
+                                                        bandService
+                                                                .profileController
+                                                                .profileList[0]
+                                                                .userPosition ==
+                                                            "none" &&
+                                                        bandService
+                                                                .profileController
+                                                                .useranotherprofile[
+                                                                    0]
+                                                                .userId !=
+                                                            bandService
+                                                                .profileController
+                                                                .profileid
+                                                                .value &&
+                                                        !bandService
+                                                            .notificationController
+                                                            .sendOffer
+                                                            .value) {
+                                                      return ElevatedButton(
+                                                        style: ButtonStyle(
+                                                          padding:
+                                                              MaterialStateProperty
+                                                                  .all<
+                                                                      EdgeInsets>(
+                                                            const EdgeInsets
+                                                                    .symmetric(
+                                                                horizontal:
+                                                                    20.0),
+                                                          ),
+                                                        ),
+                                                        onPressed: () async {
+                                                          print(bandService
+                                                              .notificationController
+                                                              .sendOffer
+                                                              .value);
+                                                          await doSendOffer(
+                                                              context);
+                                                        },
+                                                        child:
+                                                            const Text("Email"),
+                                                      );
+                                                    } else {
+                                                      return Container(); // หรือใส่ Widget ที่เปลี่ยนแปลงอื่น ๆ ของคุณที่คุณต้องการแสดง
+                                                    }
+                                                  })
                                                 ],
                                               ),
                                             ],
@@ -402,7 +553,7 @@ class _AnotherProfileTabState extends State<AnotherProfileTab> {
                                                 BorderRadius.circular(170.0),
                                             image: DecorationImage(
                                               image: NetworkImage(
-                                                  '${Config.getImage}${bandService.profileController.profileList[0].userAvatar}'),
+                                                  '${Config.getImage}${bandService.profileController.useranotherprofile[0].userAvatar}'),
                                               fit: BoxFit.cover,
                                             ),
                                           ),
@@ -481,7 +632,7 @@ class _AnotherProfileTabState extends State<AnotherProfileTab> {
                               height: 22,
                             ),
                             Container(
-                              height: height * 0.43,
+                              height: height * 0.5,
                               child: LayoutBuilder(
                                 builder: (context, constraints) {
                                   double innerHeight = constraints.maxHeight;
@@ -663,16 +814,76 @@ class _AnotherProfileTabState extends State<AnotherProfileTab> {
                                                     MainAxisAlignment.center,
                                                 children: [
                                                   Obx(() {
-                                                    // final bool
-                                                    //     shouldShowButton =
-                                                    //     widget.anotherpofileid !=
-                                                    //         bandService
-                                                    //             .profileController
-                                                    //             .profileid
-                                                    //             .value;
-                                                    // return Visibility(
-                                                    //   visible: shouldShowButton,
-                                                    return ElevatedButton(
+                                                    checkButton();
+                                                    final showFollowButton =
+                                                        checkbutton;
+                                                    return Visibility(
+                                                      visible: showFollowButton,
+                                                      child: ElevatedButton(
+                                                        style: ButtonStyle(
+                                                          padding:
+                                                              MaterialStateProperty
+                                                                  .all<
+                                                                      EdgeInsets>(
+                                                            const EdgeInsets
+                                                                .symmetric(
+                                                              horizontal: 20.0,
+                                                            ),
+                                                          ),
+                                                          backgroundColor:
+                                                              MaterialStateProperty
+                                                                  .all<Color>(
+                                                            bandService
+                                                                    .profileController
+                                                                    .isFollowing
+                                                                    .value
+                                                                ? ColorConstants
+                                                                    .unfollow
+                                                                : ColorConstants
+                                                                    .appColors,
+                                                          ),
+                                                          foregroundColor:
+                                                              MaterialStateProperty
+                                                                  .all<Color>(
+                                                            Colors.white,
+                                                          ),
+                                                        ),
+                                                        onPressed: () {
+                                                          if (bandService
+                                                              .profileController
+                                                              .isFollowing
+                                                              .value) {
+                                                            //! ถ้ากำลัง Following ให้ทำ Unfollow
+                                                            //! ทำการ Unfollow ที่นี่
+                                                            bandService
+                                                                .profileController
+                                                                .doUnfollow();
+                                                          } else {
+                                                            //! ถ้าไม่ได้ Following ให้ทำ Follow
+                                                            bandService
+                                                                .profileController
+                                                                .dofollow();
+                                                            // profileController.toggleFollow();
+                                                          }
+                                                        },
+                                                        child: Text(
+                                                          bandService
+                                                                  .profileController
+                                                                  .isFollowing
+                                                                  .value
+                                                              ? 'Unfollow'
+                                                              : 'Follow',
+                                                        ),
+                                                      ),
+                                                    );
+                                                  }),
+                                                  const SizedBox(
+                                                    width: 20,
+                                                  ),
+                                                  Visibility(
+                                                    visible:
+                                                        checkButtoninvite(),
+                                                    child: ElevatedButton(
                                                       style: ButtonStyle(
                                                         padding:
                                                             MaterialStateProperty
@@ -683,72 +894,58 @@ class _AnotherProfileTabState extends State<AnotherProfileTab> {
                                                             horizontal: 20.0,
                                                           ),
                                                         ),
-                                                        backgroundColor:
-                                                            MaterialStateProperty
-                                                                .all<Color>(
-                                                          bandService
-                                                                  .profileController
-                                                                  .isFollowing
-                                                                  .value
-                                                              ? ColorConstants
-                                                                  .unfollow
-                                                              : ColorConstants
-                                                                  .appColors,
-                                                        ),
-                                                        foregroundColor:
-                                                            MaterialStateProperty
-                                                                .all<Color>(
-                                                          Colors.white,
-                                                        ),
                                                       ),
                                                       onPressed: () {
-                                                        if (bandService
-                                                            .profileController
-                                                            .isFollowing
-                                                            .value) {
-                                                          //! ถ้ากำลัง Following ให้ทำ Unfollow
-                                                          //! ทำการ Unfollow ที่นี่
-                                                          bandService
-                                                              .profileController
-                                                              .doUnfollow();
-                                                        } else {
-                                                          //! ถ้าไม่ได้ Following ให้ทำ Follow
-                                                          bandService
-                                                              .profileController
-                                                              .dofollow();
-                                                          // profileController.toggleFollow();
-                                                        }
+                                                        // Handle button click
                                                       },
-                                                      child: Text(
-                                                        bandService
-                                                                .profileController
-                                                                .isFollowing
-                                                                .value
-                                                            ? 'Unfollow'
-                                                            : 'Follow',
-                                                      ),
-                                                    );
-                                                    // );
-                                                  }),
+                                                      child:
+                                                          const Text("Invite"),
+                                                    ),
+                                                  ),
                                                   const SizedBox(
                                                     width: 20,
                                                   ),
-                                                  ElevatedButton(
-                                                    style: ButtonStyle(
-                                                      padding:
-                                                          MaterialStateProperty
-                                                              .all<EdgeInsets>(
-                                                        const EdgeInsets
-                                                            .symmetric(
-                                                          horizontal: 20.0,
+                                                  Obx(() {
+                                                    if (bandService
+                                                            .profileController
+                                                            .profileList
+                                                            .isNotEmpty &&
+                                                        bandService
+                                                                .profileController
+                                                                .profileList[0]
+                                                                .userPosition ==
+                                                            "none"  &&
+                                                        !bandService
+                                                            .notificationController
+                                                            .sendOffer
+                                                            .value) {
+                                                      return ElevatedButton(
+                                                        style: ButtonStyle(
+                                                          padding:
+                                                              MaterialStateProperty
+                                                                  .all<
+                                                                      EdgeInsets>(
+                                                            const EdgeInsets
+                                                                    .symmetric(
+                                                                horizontal:
+                                                                    20.0),
+                                                          ),
                                                         ),
-                                                      ),
-                                                    ),
-                                                    onPressed: () {
-                                                      // Handle button click
-                                                    },
-                                                    child: const Text("Invite"),
-                                                  ),
+                                                        onPressed: () async {
+                                                          print(bandService
+                                                              .notificationController
+                                                              .sendOffer
+                                                              .value);
+                                                          await doSendOffer(
+                                                              context);
+                                                        },
+                                                        child:
+                                                            const Text("Email"),
+                                                      );
+                                                    } else {
+                                                      return Container(); // หรือใส่ Widget ที่เปลี่ยนแปลงอื่น ๆ ของคุณที่คุณต้องการแสดง
+                                                    }
+                                                  })
                                                 ],
                                               ),
                                             ],
@@ -821,5 +1018,140 @@ class _AnotherProfileTabState extends State<AnotherProfileTab> {
         ),
       ),
     );
+  }
+
+  // ? void showCustomSnackBar(String title, String message, Color color)
+  void showCustomSnackBar(
+      String title, String message, Color color, ContentType contentType) {
+    // late final ContentType contentType;
+    final snackBar = SnackBar(
+      /// need to set following properties for best effect of awesome_snackbar_content
+      elevation: 0,
+      behavior: SnackBarBehavior.floating,
+      backgroundColor: Colors.transparent,
+      content: AwesomeSnackbarContent(
+        title: title,
+        message: message,
+
+        /// change contentType to ContentType.success, ContentType.warning or ContentType.help for variants
+        contentType: contentType,
+        color: color,
+      ),
+    );
+
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(snackBar);
+  }
+
+  Future doInviteband(BuildContext context) async {
+    print(bandService.bandsController.createBand.value);
+    var rs = await bandService.notificationController.createNoti();
+    var jsonRes = jsonDecode(rs.body);
+    print(rs.body);
+    if (rs.statusCode == 200) {
+      if (jsonRes['success'] == 1) {
+        // setState(() {
+        //   _saving = true;
+        // });
+        // ! redirect
+        if (mounted) {
+          showCustomSnackBar('Congratulations', 'InvitedBand Successfully',
+              ColorConstants.appColors, ContentType.success);
+          bandService.notificationController.isInvited.value = true;
+          // setState(() {
+          //   _saving = false;
+          // });
+        }
+      }
+      // }
+    } else if (rs.statusCode == 404) {
+      switch (jsonRes['message']) {
+        // !  มีชื่อวงนี้อยู่ใน DB Table Bands อยู่แล้ว
+        case "You invited this person":
+          showCustomSnackBar(
+              'Invite Failed',
+              'You invited this person',
+              Colors.red, // สีแดงหรือสีที่คุณต้องการ
+              ContentType.failure);
+          break;
+        // ! สามารถสร้างได้วงเดียว
+        case "The band members are full.":
+          showCustomSnackBar(
+              'Invite Failed',
+              'The band members are full',
+              Colors.red, // สีแดงหรือสีที่คุณต้องการ
+              ContentType.failure);
+          break;
+      }
+    } else if (rs.statusCode == 500) {
+      showCustomSnackBar(
+          'Invite Failed',
+          "Database Error",
+          Colors.red, // สีแดงหรือสีที่คุณต้องการ
+          ContentType.failure);
+    } else if (rs.statusCode == 498) {
+      showCustomSnackBar(
+          'Invite FAILED',
+          "Invalid token",
+          Colors.red, // สีแดงหรือสีที่คุณต้องการ
+          ContentType.failure);
+      _mainWrapperController.logOut();
+      // การส่งข้อมูลไม่สำเร็จ
+    }
+  }
+
+  Future doSendOffer(BuildContext context) async {
+    var rs;
+    print(bandService.bandsController.createBand.value);
+    if (bandService.profileController.anotherProfileType.value == "user") {
+      rs = await bandService.notificationController.createSendEmailtoUser();
+    } else if (bandService.profileController.anotherProfileType.value ==
+        "band") {
+      rs = await bandService.notificationController.createSendEmailtoBand();
+    }
+    print(rs.body);
+    var jsonRes = jsonDecode(rs!.body);
+    if (rs.statusCode == 200) {
+      if (jsonRes['success'] == 1) {
+        showCustomSnackBar('Congratulations', 'SendOffer Successfully',
+            ColorConstants.appColors, ContentType.success);
+        bandService.notificationController.sendOffer.value = true;
+      }
+      // }
+    } else if (rs.statusCode == 404) {
+      switch (jsonRes['message']) {
+        // !  มีชื่อวงนี้อยู่ใน DB Table Bands อยู่แล้ว
+        case "You dont sent Offer to him":
+          showCustomSnackBar(
+              'Invite Failed',
+              'You dont sent Offer to him',
+              Colors.red, // สีแดงหรือสีที่คุณต้องการ
+              ContentType.failure);
+          break;
+        // ! สามารถสร้างได้วงเดียว
+        case "Record not Found":
+          showCustomSnackBar(
+              'Invite Failed',
+              'Record not Found',
+              Colors.red, // สีแดงหรือสีที่คุณต้องการ
+              ContentType.failure);
+          break;
+      }
+    } else if (rs.statusCode == 403) {
+      showCustomSnackBar(
+          'Invite Failed',
+          "You offered this person",
+          Colors.red, // สีแดงหรือสีที่คุณต้องการ
+          ContentType.failure);
+    } else if (rs.statusCode == 498) {
+      _mainWrapperController.logOut();
+      showCustomSnackBar(
+          'Invite FAILED',
+          "Invalid token",
+          Colors.red, // สีแดงหรือสีที่คุณต้องการ
+          ContentType.failure);
+      // การส่งข้อมูลไม่สำเร็จ
+    }
   }
 }

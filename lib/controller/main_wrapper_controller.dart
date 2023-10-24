@@ -27,7 +27,7 @@ class MainWrapperController extends GetxController {
   List<Widget> pages = [
     const HomeTab(),
     const BandTab(),
-    const MessageTab(),
+    const SearchTab(),
     const ProfileTab(),
   ];
   ThemeMode get theme => Get.isDarkMode ? ThemeMode.dark : ThemeMode.light;

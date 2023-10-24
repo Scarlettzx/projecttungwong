@@ -4,4 +4,6 @@ class Config {
       "https://raw.githubusercontent.com/kongvut/thai-province-data/master/api_province.json";
   static const String getImage = '$endPoint/uploads/images/users/';
   static const String getImageBand = '$endPoint/uploads/images/bands/';
+  static const String getvideo = '$endPoint/uploads/videos/users/';
+  static const String getvideoBand = '$endPoint/uploads/videos/bands/';
 }

@@ -2,6 +2,7 @@
 // import 'dart:convert';
 // import 'dart:io';
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:http_parser/http_parser.dart';
@@ -30,6 +31,7 @@ class BandsController extends GetxController {
   // final ProfileController profileController = Get.find<ProfileController>();
   // !อันเดิม
   // final ProfileController profileController = Get.put(ProfileController());
+  final kickpersonid = 0.obs;
   List<Member> memberList = [];
   var bandList = <Band>[].obs;
   final RxBool isBand = false.obs;
@@ -108,6 +110,8 @@ class BandsController extends GetxController {
 
 // ! getBand
   Future<void> getBand() async {
+    isLoading.value = true;
+
     print("isBand.value");
     print(isBand.value);
     final prefs = await SharedPreferences.getInstance();
@@ -153,6 +157,8 @@ class BandsController extends GetxController {
       }
     } catch (e) {
       print(e.toString());
+    } finally {
+      isLoading.value = false;
     }
   }
 
@@ -233,7 +239,7 @@ class BandsController extends GetxController {
       memberList.clear();
       memberList.addAll(membersList);
       print("memberList");
-      print(memberList);
+      print((jsonEncode(memberList)));
       // Future.delayed(const Duration(seconds: 1), () {
       //   isLoading.value = false; // โหลดข้อมูลเสร็จสิ้น
       // });
@@ -259,6 +265,7 @@ class BandsController extends GetxController {
         print(response.body);
         isBand.value = false;
         createBand.value = false;
+        bandService.profileController.getProfile();
       } else if (response.statusCode == 404) {
         print("404");
         print(response.body);
@@ -272,6 +279,104 @@ class BandsController extends GetxController {
     } catch (e) {
       print(e.toString());
     }
+  }
+
+  //  ! kickuserOutband
+  Future<void> kickuserOutband() async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('token');
+    final Uri url = Uri.parse(
+      '${Config.endPoint}/api/bands/leavebandbyfounder',
+    );
+    final headers = {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer $token',
+    };
+    final body =
+        jsonEncode({"person_id": kickpersonid.value, 'band_id': bandid.value});
+    final response = await http.delete(url, headers: headers, body: body);
+    try {
+      if (response.statusCode == 200) {
+        print(response.body);
+      } else if (response.statusCode == 404) {
+        print("404");
+        print(response.body);
+      } else if (response.statusCode == 409) {
+        print("409");
+        print(response.body);
+      } else {
+        Get.snackbar("Error Loading data",
+            'Server Response: ${response.statusCode}:${response.reasonPhrase.toString()}');
+      }
+    } catch (e) {
+      print(e.toString());
+    }
+  }
+
+  // !leaveband
+  Future<void> leaveband() async {
+    isLoading.value = true;
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('token');
+    final Uri url = Uri.parse(
+      '${Config.endPoint}/api/bands/leavebandbymember',
+    );
+    final headers = {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer $token',
+    };
+    final body = jsonEncode({'band_id': bandid.value});
+    final response = await http.delete(url, headers: headers, body: body);
+    try {
+      if (response.statusCode == 200) {
+        print(response.body);
+        isLoading.value = false;
+      } else if (response.statusCode == 404) {
+        print("404");
+        print(response.body);
+      } else if (response.statusCode == 409) {
+        print("409");
+        print(response.body);
+      } else {
+        Get.snackbar("Error Loading data",
+            'Server Response: ${response.statusCode}:${response.reasonPhrase.toString()}');
+      }
+    } catch (e) {
+      print(e.toString());
+    }
+  }
+
+  Future<http.Response> editProfileBand(
+      String name, String category, String? filepath) async {
+    print(filepath);
+    // var token  = getToken();
+    // print(token);
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('token');
+    final Uri url = Uri.parse('${Config.endPoint}/api/bands/editband');
+    var request = http.MultipartRequest('PATCH', url);
+    request.fields['band_id'] = bandid.value.toString();
+    request.fields['band_category'] = category;
+    request.fields['band_name'] = name;
+    // ระบุชื่อฟิลด์และส่งรูปภาพจาก filepath
+    if (filepath != null) {
+      request.files.add(http.MultipartFile(
+        'avatar',
+        File(filepath).readAsBytes().asStream(),
+        File(filepath).lengthSync(),
+        filename: filepath,
+        contentType: MediaType('image', filepath.split(".").last),
+      ));
+    }
+    request.headers.addAll({
+      'Content-Type': 'multipart/form-data',
+      'Authorization': 'Bearer $token',
+    });
+    // ทำการส่งคำขอและรับคำขอ
+    var streamedResponse = await request.send();
+    var response = await http.Response.fromStream(streamedResponse);
+
+    return response;
   }
   // Future<http.Response> createBand() async {
   //   final prefs = await SharedPreferences.getInstance();

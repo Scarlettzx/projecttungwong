@@ -10,7 +10,7 @@ import '../utils/config.dart';
 
 class ShowsFollowers extends StatelessWidget {
   ShowsFollowers({Key? key}) : super(key: key);
-   final BandService bandService = Get.find();
+  final BandService bandService = Get.find();
   // !อันเดิม
   // final ProfileController profileController = Get.put(ProfileController());
   // final BandsController bandsController = Get.put(BandsController());
@@ -44,9 +44,10 @@ class ShowsFollowers extends StatelessWidget {
             ),
             backgroundColor: ColorConstants.appColors,
             centerTitle: true,
-            title: bandService.profileController.selectedList.value == 'followers'
-                ? Text('Followers')
-                : Text('Following')),
+            title:
+                bandService.profileController.selectedList.value == 'followers'
+                    ? Text('Followers')
+                    : Text('Following')),
         body: DefaultTabController(
           length: 2,
           child: Column(
@@ -115,20 +116,25 @@ class ShowsFollowers extends StatelessWidget {
                           // กรณีเกิดข้อผิดพลาด
                           return Center(
                               child: Text('เกิดข้อผิดพลาด: ${snapshot.error}'));
+                        } else if (bandService
+                            .profileController.personDetails.isEmpty) {
+                          // ถ้าไม่มีข้อมูล
+                          return Center(child: Text('ไม่มีผู้ติดตาม'));
                         } else {
                           // แสดงข้อมูลเมื่อได้รับข้อมูลเสร็จสมบูรณ์
                           return ListView.separated(
                             padding: EdgeInsets.all(15),
                             separatorBuilder: (BuildContext context, int i) =>
                                 const Divider(),
-                            itemCount: bandService.profileController.personDetails.length,
+                            itemCount: bandService
+                                .profileController.personDetails.length,
                             itemBuilder: (context, i) {
-                              var reverseindex =
-                                  bandService.profileController.personDetails.length -
-                                      1 -
-                                      i;
-                              final personDetail =
-                                  bandService.profileController.personDetails[reverseindex];
+                              var reverseindex = bandService
+                                      .profileController.personDetails.length -
+                                  1 -
+                                  i;
+                              final personDetail = bandService.profileController
+                                  .personDetails[reverseindex];
                               // ทำสิ่งที่คุณต้องการด้วยข้อมูล personIdData
                               return ListTile(
                                 leading: Container(
@@ -174,18 +180,25 @@ class ShowsFollowers extends StatelessWidget {
                           // กรณีเกิดข้อผิดพลาด
                           return Center(
                               child: Text('เกิดข้อผิดพลาด: ${snapshot.error}'));
+                        } else if (bandService
+                            .profileController.bandDetails.isEmpty) {
+                          // ถ้าไม่มีข้อมูล
+                          return Center(child: Text('ไม่มีผู้ติดตาม'));
                         } else {
                           // แสดงข้อมูลเมื่อได้รับข้อมูลเสร็จสมบูรณ์
                           return ListView.separated(
                             padding: EdgeInsets.all(15),
                             separatorBuilder: (BuildContext context, int i) =>
                                 const Divider(),
-                            itemCount: bandService.profileController.bandDetails.length,
+                            itemCount: bandService
+                                .profileController.bandDetails.length,
                             itemBuilder: (context, i) {
-                              var reverseindex =
-                                  bandService.profileController.bandDetails.length - 1 - i;
-                              final bandDetail =
-                                  bandService.profileController.bandDetails[reverseindex];
+                              var reverseindex = bandService
+                                      .profileController.bandDetails.length -
+                                  1 -
+                                  i;
+                              final bandDetail = bandService
+                                  .profileController.bandDetails[reverseindex];
                               // ทำสิ่งที่คุณต้องการด้วยข้อมูล personIdData
                               return ListTile(
                                 leading: Container(

@@ -37,7 +37,7 @@ class MyApp extends StatelessWidget {
       themeMode: Get.put(MainWrapperController()).theme,
       debugShowCheckedModeBanner: false,
       home: (token != null && JwtDecoder.isExpired(token!) == false)
-          ? MainWrapper()
+          ?  MainWrapper()
           : const LoginScreen(),
       // home: SplashView(),
     );

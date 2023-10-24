@@ -8,20 +8,6 @@ import 'package:project/utils/color.constants.dart';
 import 'package:project/view/post_tab.dart';
 
 class OptionsScreen extends StatelessWidget {
-  // static List<Commend> commend = [
-  //   Commend(id: '1', text: "สนใจครับๆ", time: 'Monday 18.30'),
-  //   Commend(id: '1', text: "สนใจครับๆ", time: 'Monday 18.30'),
-  //   Commend(id: '1', text: "สนใจครับๆ", time: 'Monday 18.30'),
-  //   Commend(id: '1', text: "สนใจครับๆ", time: 'Monday 18.30'),
-  //   Commend(id: '1', text: "สนใจครับๆ", time: 'Monday 18.30'),
-  //   Commend(id: '1', text: "สนใจครับๆ", time: 'Monday 18.30'),
-  //   Commend(id: '1', text: "สนใจครับๆ", time: 'Monday 18.30'),
-  //   Commend(id: '1', text: "สนใจครับๆ", time: 'Monday 18.30'),
-  //   Commend(id: '1', text: "สนใจครับๆ", time: 'Monday 18.30'),
-  //   Commend(id: '1', text: "สนใจครับๆ", time: 'Monday 18.30'),
-  //   Commend(id: '1', text: "สนใจครับๆ", time: 'Monday 18.30'),
-  //   Commend(id: '1', text: "สนใจครับๆ", time: 'Monday 18.30'),
-  // ];
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -71,12 +57,12 @@ class OptionsScreen extends StatelessWidget {
                 children: [
                   Padding(
                       padding: const EdgeInsets.only(
-                    right: 80,
+                    right: 50,
+                    // top: 50,
                   )),
                   LikeButton(
                     size: 40,
                   ),
-
                   Text('601k'), // total like
                   SizedBox(height: 20),
                   IconButton(

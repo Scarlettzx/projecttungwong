@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:developer';
+import 'dart:io';
 
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
@@ -10,7 +11,7 @@ import 'package:project/data/models/profile_model.dart';
 import 'package:project/utils/config.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
-
+import 'package:http_parser/http_parser.dart';
 import '../data/models/band_model.dart';
 import '../data/models/follower_model.dart';
 import '../services/bandservice.dart';
@@ -21,13 +22,14 @@ class ProfileController extends GetxController {
   // final BandsController bandsController = Get.find<BandsController>();
   // ! อันใหม่
   // final BandsController bandsController = Get.put(BandsController());
-  var bandanotherprofile = <Band>[].obs;
+
   RxList<Map<String, dynamic>> personIdList = RxList<Map<String, dynamic>>();
   RxList<BandDetails> bandDetails = RxList<BandDetails>();
   RxList<PersonDetails> personDetails = RxList<PersonDetails>();
   RxList<BandDetails> bandDetailsfollowing = RxList<BandDetails>();
   RxList<PersonDetails> personDetailfollowing = RxList<PersonDetails>();
   var isFollowing = false.obs;
+  var isEmpty = false.obs;
   final RxInt anotherprofileid = 0.obs;
   final anotherProfileType = "".obs;
   //  List<> memberList = [];
@@ -35,7 +37,8 @@ class ProfileController extends GetxController {
   // var bandDetails = <BandDetails>[].obs;
   var countFollowing = 0.obs;
   RxInt countFollowers = 0.obs;
-  var profilefollower = <ProfileModel>[].obs;
+  var bandanotherprofile = <Band>[].obs;
+  var useranotherprofile = <ProfileModel>[].obs;
   var profileList = <ProfileModel>[].obs;
   var isLoading = true.obs;
   final RxInt profileid = 0.obs;
@@ -65,9 +68,42 @@ class ProfileController extends GetxController {
   //   }
   //   isLoading.value = false;
   // }
+  Future<http.Response> editProfile(
+      String name, String country, String position, String? filepath) async {
+    print(filepath);
+    // var token  = getToken();
+    // print(token);
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('token');
+    final Uri url = Uri.parse('${Config.endPoint}/api/users/editprofile');
+    var request = http.MultipartRequest('PATCH', url);
+    request.fields['username'] = name;
+    request.fields['country'] = country;
+    request.fields['position'] = position;
+    // ระบุชื่อฟิลด์และส่งรูปภาพจาก filepath
+    if (filepath != null) {
+      request.files.add(http.MultipartFile(
+        'avatar',
+        File(filepath).readAsBytes().asStream(),
+        File(filepath).lengthSync(),
+        filename: filepath,
+        contentType: MediaType('image', filepath.split(".").last),
+      ));
+    }
+    request.headers.addAll({
+      'Content-Type': 'multipart/form-data',
+      'Authorization': 'Bearer $token',
+    });
+    // ทำการส่งคำขอและรับคำขอ
+    var streamedResponse = await request.send();
+    var response = await http.Response.fromStream(streamedResponse);
+
+    return response;
+  }
 
 // ! getprofileme
   Future<void> getProfile() async {
+    isLoading.value = true;
     // print(profileid.value);
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('token');
@@ -91,6 +127,7 @@ class ProfileController extends GetxController {
     try {
       if (response.statusCode == 200) {
         // print(response.body);
+        print(response.body);
         // final dynamic jsonData = jsonDecode(response.body);
         // final data = jsonDecode(response.body)['data'];
 
@@ -110,8 +147,6 @@ class ProfileController extends GetxController {
         // print(result);
         // profileList.value =
         // result.map((e) => ProfileModel.fromJson(e).data).toList();
-
-        isLoading.value = false;
         // update();
       } else if (response.statusCode == 404) {
         print(response.body);
@@ -121,6 +156,8 @@ class ProfileController extends GetxController {
       }
     } catch (e) {
       print(e.toString());
+    } finally {
+      isLoading.value = false;
     }
   }
 
@@ -145,11 +182,11 @@ class ProfileController extends GetxController {
 
 // 2. สร้าง ProfileModel จากข้อมูลใน 'data'
         final ProfileModel profileModel = ProfileModel.fromJson(data);
-        profileList.clear();
+        useranotherprofile.clear();
 // 3. เพิ่ม ProfileModel เข้าไปใน profileList
-        profileList.add(profileModel);
-        print(json.encode(profileList));
-        print(profileList);
+        useranotherprofile.add(profileModel);
+        print(json.encode(useranotherprofile));
+        print(useranotherprofile);
         isLoading.value = false;
         // update();
       } else if (response.statusCode == 404) {
@@ -287,9 +324,14 @@ class ProfileController extends GetxController {
     print(bandService.bandsController.isBand.value);
     print("bandService.profileController.anotherProfileType.value");
     print(bandService.profileController.anotherProfileType.value);
+    print("bandService.bandsController.bandid.value");
+    print(bandService.bandsController.bandid.value);
+    print("anotherprofileid.value");
+    print(anotherprofileid.value);
     http.Response? response; // Initialize with null
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('token');
+
     // print(profileid.value);
     // final Uri url = Uri.parse('${Config.endPoint}/api/users/unfollowers');
     // var body = {'followers_id': profileid.value};
@@ -322,7 +364,7 @@ class ProfileController extends GetxController {
       } else if (bandService.profileController.anotherProfileType.value ==
           "band") {
         final Uri url =
-            Uri.parse('${Config.endPoint}/api/follows/checkbandfollowers/band');
+            Uri.parse('${Config.endPoint}/api/follows/bandunfollowers/band');
         final body = jsonEncode({
           'band_id': bandService.bandsController.bandid.value,
           'followersband_id': anotherprofileid.value
@@ -404,7 +446,9 @@ class ProfileController extends GetxController {
         } else if (jsonRes['followers'] == true) {
           isFollowing.value = true;
         }
-      } else if (response.statusCode == 409) {}
+      } else if (response.statusCode == 409) {
+        print('this is profile him');
+      }
     } else {
       Get.snackbar("Error Loading data", 'Server Response: null');
     }

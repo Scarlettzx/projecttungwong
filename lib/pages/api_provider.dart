@@ -85,6 +85,22 @@ class ApiProvider {
       throw Exception('Error fetching data from');
     }
   }
+  Future<List<ProvinceDropdownModel>> fetchProvinceDatad() async {
+    try {
+      final response = await http.get(Uri.parse(Config.provinceAPI));
+      final data = jsonDecode(response.body) as List;
+      if (response.statusCode == 200) {
+        final List<ProvinceDropdownModel> provinces =
+            data.map((item) => ProvinceDropdownModel.fromJson(item)).toList();
+
+        return provinces;
+      } else {
+        throw Exception('ไม่สามารถร้องขอข้อมูลจังหวัดได้');
+      }
+    } on SocketException {
+      throw Exception('Error fetching data from');
+    }
+  }
 }
 
   // Future<http.Response> doGetuser(String username) async{

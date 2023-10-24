@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:awesome_snackbar_content/awesome_snackbar_content.dart';
 import 'package:flutter/material.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 // import 'package:fluttertoast/fluttertoast.dart';
 // import 'package:http/http.dart' as http;
 import 'package:project/pages/login_screen.dart';
@@ -202,6 +203,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
         body: SafeArea(
           child: ModalProgressHUD(
             inAsyncCall: _saving,
+            progressIndicator: LoadingAnimationWidget.bouncingBall(
+        size: 50,
+        color: ColorConstants.appColors,
+      ),
             child: SingleChildScrollView(
               child: Center(
                 child: Form(

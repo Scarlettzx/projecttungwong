@@ -32,9 +32,9 @@ class HomeTab extends StatelessWidget {
           child: TabBarView(
             physics: const BouncingScrollPhysics(),
             controller: tabBarController.controller,
-            children: const [
+            children: [
               VideoTab(),
-              TestsPostTab(),
+              const TestsPostTab(),
             ],
           ),
         ),

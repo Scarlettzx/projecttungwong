@@ -1,7 +1,7 @@
 import 'package:project/controller/bands_controller.dart';
 import 'package:project/controller/profile_controller.dart';
 import 'package:project/view/band_tab.dart';
-import 'package:project/view/message_tab.dart';
+import 'package:project/view/search_tab.dart';
 import 'package:project/view/profile_tab.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';

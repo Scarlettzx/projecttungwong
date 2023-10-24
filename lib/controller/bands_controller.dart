@@ -16,6 +16,7 @@ import 'package:project/controller/profile_controller.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 // import '../data/models/comment_model.dart';
+import '../data/models/allband_model.dart' as allbandmodel;
 import '../data/models/band_model.dart';
 // import '../data/models/profile_model.dart';
 import '../services/bandservice.dart';
@@ -27,6 +28,7 @@ class BandsController extends GetxController {
   // final MainWrapperController _mainWrapperController =
   //     Get.find<MainWrapperController>();
   final BandService bandService = Get.find();
+  final RxList<allbandmodel.Band> allbands = <allbandmodel.Band>[].obs;
   // ! อันใหม่
   // final ProfileController profileController = Get.find<ProfileController>();
   // !อันเดิม
@@ -83,6 +85,37 @@ class BandsController extends GetxController {
 //         return null;
 //       }
 //  }
+// !getAllBand
+  Future<void> getAllBand() async {
+    isLoading.value = true;
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('token');
+    final headers = {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer $token',
+    };
+    final Uri url = Uri.parse('${Config.endPoint}/api/bands/getallband');
+    final response = await http.get(url, headers: headers);
+    try {
+      if (response.statusCode == 200) {
+        print(response.body);
+        final postsData = allbandmodel.bandsFromJson(response.body);
+        allbands.assignAll(postsData.bands!.whereType<allbandmodel.Band>());
+        // print(allusers);
+
+        // update();
+      } else if (response.statusCode == 404) {
+        print(response.body);
+      } else {
+        Get.snackbar("Error Loading data",
+            'Server Response: ${response.statusCode}:${response.reasonPhrase.toString()}');
+      }
+    } catch (e) {
+      print(e.toString());
+    } finally {
+      isLoading.value = false;
+    }
+  }
 
 // // ! checkBand is have or not have
   Future<void> checkBand() async {

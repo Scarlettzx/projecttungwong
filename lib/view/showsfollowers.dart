@@ -7,6 +7,7 @@ import '../controller/bands_controller.dart';
 import '../controller/profile_controller.dart';
 import '../services/bandservice.dart';
 import '../utils/config.dart';
+import 'another_profile_tab.dart';
 
 class ShowsFollowers extends StatelessWidget {
   ShowsFollowers({Key? key}) : super(key: key);
@@ -137,15 +138,46 @@ class ShowsFollowers extends StatelessWidget {
                                   .personDetails[reverseindex];
                               // ทำสิ่งที่คุณต้องการด้วยข้อมูล personIdData
                               return ListTile(
-                                leading: Container(
-                                  height: 60.0,
-                                  width: 50.0,
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(40.0),
-                                    image: DecorationImage(
-                                      image: NetworkImage(
-                                          '${Config.getImage}${personDetail.userAvatar}'),
-                                      fit: BoxFit.cover,
+                                leading: InkWell(
+                                  onTap: () async {
+                                    // ! user
+                                    var userid = personDetail.userId;
+                                    bandService.profileController
+                                        .anotherprofileid.value = userid;
+                                    bandService.profileController
+                                        .anotherProfileType.value = "user";
+                                    print(bandService.profileController
+                                        .anotherProfileType.value);
+                                    print(bandService.profileController
+                                        .anotherprofileid.value);
+                                    try {
+                                      await bandService.profileController
+                                          .checkfollow();
+                                      await bandService.notificationController
+                                          .checkInviteBand();
+                                      await bandService.notificationController
+                                          .checkSendEmail();
+                                    } catch (e) {
+                                      print("Error: $e");
+                                      // Handle the error as needed
+                                    }
+                                    Get.to(
+                                        transition: Transition.downToUp,
+                                        AnotherProfileTab(
+                                          anotherpofileid: userid,
+                                        ));
+                                  },
+                                  borderRadius: BorderRadius.circular(40.0),
+                                  child: Container(
+                                    height: 60.0,
+                                    width: 50.0,
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(40.0),
+                                      image: DecorationImage(
+                                        image: NetworkImage(
+                                            '${Config.getImage}${personDetail.userAvatar}'),
+                                        fit: BoxFit.cover,
+                                      ),
                                     ),
                                   ),
                                 ),
@@ -201,15 +233,44 @@ class ShowsFollowers extends StatelessWidget {
                                   .profileController.bandDetails[reverseindex];
                               // ทำสิ่งที่คุณต้องการด้วยข้อมูล personIdData
                               return ListTile(
-                                leading: Container(
-                                  height: 60.0,
-                                  width: 50.0,
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(40.0),
-                                    image: DecorationImage(
-                                      image: NetworkImage(
-                                          '${Config.getImageBand}${bandDetail.bandAvatar}'),
-                                      fit: BoxFit.cover,
+                                leading: InkWell(
+                                  onTap: () async {
+                                    var bandid = bandDetail.bandId;
+                                    // ! เอาค่าbandidเก็บใน anotherprofileid เพื่อจะเข้า method
+                                    bandService.profileController
+                                        .anotherprofileid.value = bandid;
+                                    bandService.profileController
+                                        .anotherProfileType.value = "band";
+                                    print(bandService.profileController
+                                        .anotherProfileType.value);
+                                    print(bandService.profileController
+                                        .anotherprofileid.value);
+                                    try {
+                                      await bandService.profileController
+                                          .checkfollow();
+                                      await bandService.notificationController
+                                          .checkSendEmail();
+                                    } catch (e) {
+                                      print("Error: $e");
+                                    }
+
+                                    Get.to(
+                                        transition: Transition.downToUp,
+                                        AnotherProfileTab(
+                                          anotherpofileid: bandid,
+                                        ));
+                                  },
+                                  borderRadius: BorderRadius.circular(40.0),
+                                  child: Container(
+                                    height: 60.0,
+                                    width: 50.0,
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(40.0),
+                                      image: DecorationImage(
+                                        image: NetworkImage(
+                                            '${Config.getImageBand}${bandDetail.bandAvatar}'),
+                                        fit: BoxFit.cover,
+                                      ),
                                     ),
                                   ),
                                 ),

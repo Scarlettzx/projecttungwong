@@ -249,7 +249,7 @@ class NotificationController extends GetxController {
     }
   }
 
-  Future<http.Response> createSendEmailtoUser() async {
+  Future<http.Response> createSendEmailtoUser(String description) async {
     http.Response? response;
     print("createSendEmailtoUser");
     final prefs = await SharedPreferences.getInstance();
@@ -260,12 +260,16 @@ class NotificationController extends GetxController {
       'Authorization': 'Bearer $token',
     };
     final body = jsonEncode(
-        {'person_id': bandService.profileController.anotherprofileid.value});
+      {
+        'person_id': bandService.profileController.anotherprofileid.value,
+        'message': description
+      },
+    );
     response = await http.post(url, headers: headers, body: body);
     return response;
   }
 
-  Future<http.Response> createSendEmailtoBand() async {
+  Future<http.Response> createSendEmailtoBand(String description) async {
     http.Response? response;
     print("createSendEmailtoBand");
     final prefs = await SharedPreferences.getInstance();
@@ -275,8 +279,10 @@ class NotificationController extends GetxController {
       'Content-Type': 'application/json',
       'Authorization': 'Bearer $token',
     };
-    final body = jsonEncode(
-        {'band_id': bandService.profileController.anotherprofileid.value});
+    final body = jsonEncode({
+      'band_id': bandService.profileController.anotherprofileid.value,
+      'message': description
+    });
     response = await http.post(url, headers: headers, body: body);
     return response;
   }

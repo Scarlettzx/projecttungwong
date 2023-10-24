@@ -1,3 +1,6 @@
+import 'dart:convert';
+
+import 'package:awesome_snackbar_content/awesome_snackbar_content.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
@@ -11,6 +14,7 @@ import 'package:project/view/post_message.dart';
 import 'package:liquid_pull_to_refresh/liquid_pull_to_refresh.dart';
 // import '../controller/poststest_postsController.dart';
 import '../controller/comments_post_controller.dart';
+import '../controller/main_wrapper_controller.dart';
 import '../controller/poststest_controller.dart';
 import '../data/models/dropdown_province_model.dart';
 import '../pages/api_provider.dart';
@@ -30,10 +34,15 @@ class TestsPostTab extends StatefulWidget {
 class _TestsPostTabState extends State<TestsPostTab> {
   ApiProvider apiProvider = ApiProvider();
   final BandService bandService = Get.find();
+  // late int editpostid = 0;
   static final ScrollController _scrollController = ScrollController();
   final PoststestController _postsController = Get.put(PoststestController());
+  final TextEditingController __editpostController = TextEditingController();
   final CommentsPostController _commentspostscontroller =
       Get.put(CommentsPostController());
+  final MainWrapperController _mainWrapperController =
+      Get.find<MainWrapperController>();
+  final _keyForm = GlobalKey<FormState>();
   List<Post> displaypost = []; // Initialize as an empty list
   List<String> itemsRole = ['All', 'Guitar', 'Vocal', 'Drum', 'Bass'];
   // final ScrollController _scrollController = ScrollController();
@@ -60,12 +69,68 @@ class _TestsPostTabState extends State<TestsPostTab> {
   @override
   void initState() {
     super.initState();
+    // bandService.profileController.getProfile();
     _postsController.getPosts();
+    bandService.notificationController.getNotifications();
     // _postsController.update_displaypost();
     displaypost = _postsController.displaypost;
+    // print("bandService.profileController.profileList[0].userIsAdmin");
+    // print(bandService.profileController.profileList[0].userIsAdmin);
     // print(_postsController.posts);
+    // print("bandService.profileController.isAdmin.value");
+    // print(bandService.profileController.isAdmin.value);
     print("displaypost");
     print(displaypost);
+  }
+
+  @override
+  void dispose() {
+    __editpostController.dispose();
+    super.dispose();
+  }
+
+  // ? void showCustomSnackBar(String title, String message, Color color)
+  void showCustomSnackBar(
+      String title, String message, Color color, ContentType contentType) {
+    // late final ContentType contentType;
+    final snackBar = SnackBar(
+      /// need to set following properties for best effect of awesome_snackbar_content
+      elevation: 0,
+      behavior: SnackBarBehavior.floating,
+      backgroundColor: Colors.transparent,
+      content: AwesomeSnackbarContent(
+        title: title,
+        message: message,
+
+        /// change contentType to ContentType.success, ContentType.warning or ContentType.help for variants
+        contentType: contentType,
+        color: color,
+      ),
+    );
+
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(snackBar);
+  }
+
+  String? _checkeditPostValidator(String? fieldContent) {
+    RegExp messageRegExp = RegExp(r'^[A-Za-z0-9ก-๙]+$');
+    if (fieldContent!.isEmpty || fieldContent.trim().length < 5) {
+      showCustomSnackBar(
+          'EDITPOST FAILED',
+          "Please Fill Message or Something..",
+          Colors.red, // สีแดงหรือสีที่คุณต้องการ
+          ContentType.failure);
+      return "";
+    } else if (!messageRegExp.hasMatch(fieldContent)) {
+      showCustomSnackBar(
+          'EDITPOST FAILED',
+          "Message is not Correct Please try again",
+          Colors.red, // สีแดงหรือสีที่คุณต้องการ
+          ContentType.failure);
+      return "";
+    }
+    return null;
   }
 
   void updatePost(String value) {
@@ -398,7 +463,10 @@ class _TestsPostTabState extends State<TestsPostTab> {
                             )
                           ]));
                     }
-                    return const CircularProgressIndicator();
+                    return LoadingAnimationWidget.dotsTriangle(
+                      size: 50,
+                      color: ColorConstants.appColors,
+                    );
                   },
                 ),
               ),
@@ -406,6 +474,8 @@ class _TestsPostTabState extends State<TestsPostTab> {
             Obx(() {
               print(
                   ' bandService.bandsController.bandid = = = = ${bandService.bandsController.bandid}');
+              print("bandService.profileController.isAdmin.value");
+              print(bandService.profileController.isAdmin.value);
               return !_postsController.isLoading.value
                   ? SliverList(
                       delegate: SliverChildBuilderDelegate(
@@ -421,42 +491,134 @@ class _TestsPostTabState extends State<TestsPostTab> {
                           // ! showpostsBand
                           if (isBand) {
                             return Slidable(
-                              enabled:
-                                  (bandService.bandsController.isBand.value ==
-                                              true) &&
-                                          (displaypost[reverseindex]
-                                                  .bandDetails!
-                                                  .bandId ==
-                                              bandService
-                                                  .bandsController.bandid.value)
-                                      ? true
-                                      : false,
                               endActionPane: ActionPane(
                                   // extentRatio: 0.3,
 
                                   motion: const StretchMotion(),
                                   children: [
-                                    SlidableAction(
-                                      flex: 3,
-                                      onPressed: ((context) {}),
-                                      backgroundColor: Colors.amber,
-                                      icon: IconlyBold.edit,
-                                      foregroundColor: Colors.white,
-                                    ),
-                                    SlidableAction(
-                                      flex: 3,
-                                      onPressed: ((context) {}),
-                                      backgroundColor: Colors.red,
-                                      icon: IconlyBold.delete,
-                                      foregroundColor: Colors.white,
-                                    ),
-                                    SlidableAction(
-                                      flex: 4,
-                                      onPressed: ((context) {}),
-                                      backgroundColor: ColorConstants.unfollow,
-                                      icon: Icons.report_rounded,
-                                      foregroundColor: Colors.white,
-                                    )
+                                    if ((bandService
+                                                .bandsController.isBand.value ==
+                                            true) &&
+                                        (displaypost[reverseindex]
+                                                .bandDetails!
+                                                .bandId ==
+                                            bandService.bandsController.bandid
+                                                .value)) ...[
+                                      SlidableAction(
+                                        flex: 3,
+                                        onPressed: ((context) {
+                                          __editpostController.clear();
+                                          Get.defaultDialog(
+                                            title: '',
+                                            content: Form(
+                                              key: _keyForm,
+                                              child: Column(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment.center,
+                                                children: [
+                                                  TextFormField(
+                                                    cursorColor: ColorConstants
+                                                        .appColors,
+                                                    validator:
+                                                        _checkeditPostValidator,
+                                                    controller:
+                                                        __editpostController,
+                                                    keyboardType:
+                                                        TextInputType.text,
+                                                    maxLines: 1,
+                                                    decoration:
+                                                        const InputDecoration(
+                                                      labelText: 'Message',
+                                                      hintMaxLines: 1,
+                                                      border:
+                                                          OutlineInputBorder(
+                                                        borderSide: BorderSide(
+                                                            color: Colors.green,
+                                                            width: 4.0),
+                                                      ),
+                                                    ),
+                                                  ),
+                                                  SizedBox(
+                                                    height: 30.0,
+                                                  ),
+                                                  ElevatedButton(
+                                                    onPressed: () async {
+                                                      if (_keyForm.currentState!
+                                                          .validate()) {
+                                                        await doEditPost(
+                                                            context, postid!);
+                                                        Get.back();
+                                                      }
+                                                    },
+                                                    style: ButtonStyle(
+                                                      padding:
+                                                          MaterialStateProperty
+                                                              .all<EdgeInsets>(
+                                                        const EdgeInsets
+                                                                .symmetric(
+                                                            horizontal: 20.0),
+                                                      ),
+                                                      backgroundColor:
+                                                          MaterialStateProperty
+                                                              .all<Color>(
+                                                        Color.fromARGB(
+                                                            255, 35, 236, 193),
+                                                      ),
+                                                    ),
+                                                    child: const Text(
+                                                      'EDIT SAVE',
+                                                      style: TextStyle(
+                                                        color: Colors.white,
+                                                        fontSize: 16.0,
+                                                      ),
+                                                    ),
+                                                  )
+                                                ],
+                                              ),
+                                            ),
+                                            radius: 10.0,
+                                          );
+                                        }),
+                                        backgroundColor: Colors.amber,
+                                        icon: IconlyBold.edit,
+                                        foregroundColor: Colors.white,
+                                      )
+                                    ],
+                                    if ((bandService
+                                                .bandsController.isBand.value ==
+                                            true) &&
+                                        (displaypost[reverseindex]
+                                                .bandDetails!
+                                                .bandId ==
+                                            bandService.bandsController.bandid
+                                                .value)) ...[
+                                      SlidableAction(
+                                        flex: 3,
+                                        onPressed: ((context) async {
+                                          await doDeletePost(context, postid!);
+                                        }),
+                                        backgroundColor: Colors.red,
+                                        icon: IconlyBold.delete,
+                                        foregroundColor: Colors.white,
+                                      )
+                                    ],
+                                    if (bandService.profileController.isAdmin
+                                                .value !=
+                                            "true" &&
+                                        displaypost[reverseindex]
+                                                .bandDetails!
+                                                .bandId !=
+                                            bandService.bandsController.bandid
+                                                .value) ...[
+                                      SlidableAction(
+                                        flex: 4,
+                                        onPressed: ((context) {}),
+                                        backgroundColor:
+                                            ColorConstants.unfollow,
+                                        icon: Icons.report_rounded,
+                                        foregroundColor: Colors.white,
+                                      )
+                                    ],
                                   ]),
                               child: Card(
                                 shape: RoundedRectangleBorder(
@@ -501,10 +663,10 @@ class _TestsPostTabState extends State<TestsPostTab> {
                                                     .profileController
                                                     .anotherProfileType
                                                     .value = "band";
-                                                bandService
-                                                    .bandsController
-                                                    .anotherbandid
-                                                    .value = bandid;
+                                                // bandService
+                                                //     .bandsController
+                                                //     .anotherbandid
+                                                //     .value = bandid;
                                                 print(bandService
                                                     .profileController
                                                     .anotherProfileType
@@ -813,42 +975,133 @@ class _TestsPostTabState extends State<TestsPostTab> {
                             );
                           } else {
                             return Slidable(
-                              enabled:
-                                  (bandService.bandsController.isBand.value ==
-                                              false) &&
-                                          (displaypost[reverseindex]
-                                                  .personDetails!
-                                                  .userId ==
-                                              bandService.profileController
-                                                  .profileid.value)
-                                      ? true
-                                      : false,
                               endActionPane: ActionPane(
                                   // extentRatio: 0.3,
-
                                   motion: const StretchMotion(),
                                   children: [
-                                    SlidableAction(
-                                      flex: 3,
-                                      onPressed: ((context) {}),
-                                      backgroundColor: Colors.amber,
-                                      icon: IconlyBold.edit,
-                                      foregroundColor: Colors.white,
-                                    ),
-                                    SlidableAction(
-                                      flex: 3,
-                                      onPressed: ((context) {}),
-                                      backgroundColor: Colors.red,
-                                      icon: IconlyBold.delete,
-                                      foregroundColor: Colors.white,
-                                    ),
-                                    SlidableAction(
-                                      flex: 4,
-                                      onPressed: ((context) {}),
-                                      backgroundColor: ColorConstants.unfollow,
-                                      icon: Icons.report_rounded,
-                                      foregroundColor: Colors.white,
-                                    )
+                                    if (bandService
+                                                .bandsController.isBand.value ==
+                                            false &&
+                                        displaypost[reverseindex]
+                                                .personDetails!
+                                                .userId ==
+                                            bandService.profileController
+                                                .profileid.value) ...[
+                                      SlidableAction(
+                                        flex: 3,
+                                        onPressed: ((context) {
+                                          __editpostController.clear();
+                                          Get.defaultDialog(
+                                            title: '',
+                                            content: Form(
+                                              key: _keyForm,
+                                              child: Column(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment.center,
+                                                children: [
+                                                  TextFormField(
+                                                    cursorColor: ColorConstants
+                                                        .appColors,
+                                                    validator:
+                                                        _checkeditPostValidator,
+                                                    controller:
+                                                        __editpostController,
+                                                    keyboardType:
+                                                        TextInputType.text,
+                                                    maxLines: 1,
+                                                    decoration:
+                                                        const InputDecoration(
+                                                      labelText: 'Message',
+                                                      hintMaxLines: 1,
+                                                      border:
+                                                          OutlineInputBorder(
+                                                        borderSide: BorderSide(
+                                                            color: Colors.green,
+                                                            width: 4.0),
+                                                      ),
+                                                    ),
+                                                  ),
+                                                  SizedBox(
+                                                    height: 30.0,
+                                                  ),
+                                                  ElevatedButton(
+                                                    onPressed: () async {
+                                                      if (_keyForm.currentState!
+                                                          .validate()) {
+                                                        await doEditPost(
+                                                            context, postid!);
+                                                        Get.back();
+                                                      }
+                                                    },
+                                                    style: ButtonStyle(
+                                                      padding:
+                                                          MaterialStateProperty
+                                                              .all<EdgeInsets>(
+                                                        const EdgeInsets
+                                                                .symmetric(
+                                                            horizontal: 20.0),
+                                                      ),
+                                                      backgroundColor:
+                                                          MaterialStateProperty
+                                                              .all<Color>(
+                                                        Color.fromARGB(
+                                                            255, 35, 236, 193),
+                                                      ),
+                                                    ),
+                                                    child: const Text(
+                                                      'EDIT SAVE',
+                                                      style: TextStyle(
+                                                        color: Colors.white,
+                                                        fontSize: 16.0,
+                                                      ),
+                                                    ),
+                                                  )
+                                                ],
+                                              ),
+                                            ),
+                                            radius: 10.0,
+                                          );
+                                        }),
+                                        backgroundColor: Colors.amber,
+                                        icon: IconlyBold.edit,
+                                        foregroundColor: Colors.white,
+                                      )
+                                    ],
+                                    if (bandService
+                                                .bandsController.isBand.value ==
+                                            false &&
+                                        displaypost[reverseindex]
+                                                .personDetails!
+                                                .userId ==
+                                            bandService.profileController
+                                                .profileid.value) ...[
+                                      SlidableAction(
+                                        flex: 3,
+                                        onPressed: ((context) async {
+                                          await doDeletePost(context, postid!);
+                                        }),
+                                        backgroundColor: Colors.red,
+                                        icon: IconlyBold.delete,
+                                        foregroundColor: Colors.white,
+                                      )
+                                    ],
+                                    if (bandService.profileController.isAdmin
+                                                .value !=
+                                            "true" &&
+                                        displaypost[reverseindex]
+                                                .personDetails!
+                                                .userId !=
+                                            bandService.profileController
+                                                .profileid.value) ...[
+                                      SlidableAction(
+                                        flex: 4,
+                                        onPressed: ((context) {}),
+                                        backgroundColor:
+                                            ColorConstants.unfollow,
+                                        icon: Icons.report_rounded,
+                                        foregroundColor: Colors.white,
+                                      )
+                                    ]
                                   ]),
                               child: Card(
                                 shape: RoundedRectangleBorder(
@@ -1065,5 +1318,70 @@ class _TestsPostTabState extends State<TestsPostTab> {
         ),
       ),
     );
+  }
+
+  Future doEditPost(
+    BuildContext context,
+    int postid,
+  ) async {
+    var rs = await _postsController.editPost(
+        postid, __editpostController.text.trim());
+    print(rs.body);
+    var jsonRes = jsonDecode(rs.body);
+    if (rs.statusCode == 200) {
+      if (jsonRes['success'] == 1) {
+        showCustomSnackBar('Congratulations', 'EditPost Successfully',
+            ColorConstants.appColors, ContentType.success);
+      }
+      await _postsController.getPosts();
+      displaypost = _postsController.displaypost;
+      // }
+    } else if (rs.statusCode == 500) {
+      showCustomSnackBar(
+          'EditPost Failed',
+          'Database connection error',
+          Colors.red, // สีแดงหรือสีที่คุณต้องการ
+          ContentType.failure);
+    } else if (rs.statusCode == 498) {
+      _mainWrapperController.logOut();
+      showCustomSnackBar(
+          'EditPost Failed',
+          "Invalid token",
+          Colors.red, // สีแดงหรือสีที่คุณต้องการ
+          ContentType.failure);
+      // การส่งข้อมูลไม่สำเร็จ
+    }
+  }
+
+  Future doDeletePost(
+    BuildContext context,
+    int postid,
+  ) async {
+    var rs = await _postsController.deletePost(postid);
+    print(rs.body);
+    var jsonRes = jsonDecode(rs.body);
+    if (rs.statusCode == 200) {
+      if (jsonRes['success'] == 1) {
+        showCustomSnackBar('Congratulations', 'deletePost Successfully',
+            ColorConstants.appColors, ContentType.success);
+      }
+      await _postsController.getPosts();
+      displaypost = _postsController.displaypost;
+      // }
+    } else if (rs.statusCode == 500) {
+      showCustomSnackBar(
+          'deletePost Failed',
+          'Database connection error',
+          Colors.red, // สีแดงหรือสีที่คุณต้องการ
+          ContentType.failure);
+    } else if (rs.statusCode == 498) {
+      _mainWrapperController.logOut();
+      showCustomSnackBar(
+          'deletePost Failed',
+          "Invalid token",
+          Colors.red, // สีแดงหรือสีที่คุณต้องการ
+          ContentType.failure);
+      // การส่งข้อมูลไม่สำเร็จ
+    }
   }
 }

@@ -153,7 +153,7 @@ class _ContentScreenState extends State<ContentScreen> {
                                   child: InkWell(
                                     splashColor: Colors.transparent,
                                     highlightColor: Colors.transparent,
-                                    onTap: () {
+                                    onTap: () async {
                                       var bandid =
                                           widget.video.bandDetails!.bandId;
                                       // ! เอาค่าbandidเก็บใน anotherprofileid เพื่อจะเข้า method
@@ -165,8 +165,15 @@ class _ContentScreenState extends State<ContentScreen> {
                                           .anotherProfileType.value);
                                       print(bandService.profileController
                                           .anotherprofileid.value);
-                                      bandService.profileController
-                                          .checkfollow();
+                                      try {
+                                        await bandService.profileController
+                                            .checkfollow();
+                                        await bandService.notificationController
+                                            .checkSendEmail();
+                                      } catch (e) {
+                                        print("Error: $e");
+                                      }
+
                                       Get.to(
                                           transition: Transition.downToUp,
                                           AnotherProfileTab(
@@ -186,7 +193,7 @@ class _ContentScreenState extends State<ContentScreen> {
                                   child: InkWell(
                                     splashColor: Colors.transparent,
                                     highlightColor: Colors.transparent,
-                                    onTap: () {
+                                    onTap: () async {
                                       var userid =
                                           widget.video.personDetails!.userId;
                                       bandService.profileController
@@ -197,8 +204,17 @@ class _ContentScreenState extends State<ContentScreen> {
                                           .anotherProfileType.value);
                                       print(bandService.profileController
                                           .anotherprofileid.value);
-                                      bandService.profileController
-                                          .checkfollow();
+                                      try {
+                                        await bandService.profileController
+                                            .checkfollow();
+                                        await bandService.notificationController
+                                            .checkInviteBand();
+                                        await bandService.notificationController
+                                            .checkSendEmail();
+                                      } catch (e) {
+                                        print("Error: $e");
+                                        // Handle the error as needed
+                                      }
                                       Get.to(
                                           transition: Transition.downToUp,
                                           AnotherProfileTab(
@@ -263,7 +279,6 @@ class _ContentScreenState extends State<ContentScreen> {
                           print(_commentsvideoscontroller.videoid.value);
                           _commentsvideoscontroller.getCommentsByvideoid();
                           showModalBottomSheet(
-                            
                             // isScrollControlled: true,
                             context: context,
                             builder: (BuildContext context) {
@@ -515,7 +530,11 @@ class _ContentScreenState extends State<ContentScreen> {
                                                                   color: _commentsvideoscontroller
                                                                           .isIconButtonEnabled
                                                                           .value
-                                                                      ? Color.fromARGB(243, 61, 255, 190)
+                                                                      ? Color.fromARGB(
+                                                                          243,
+                                                                          61,
+                                                                          255,
+                                                                          190)
                                                                       : Colors
                                                                           .grey, // กำหนดสีตามเงื่อนไข, // กำหนดสีตามเงื่อนไข
                                                                 ),

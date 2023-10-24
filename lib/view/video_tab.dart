@@ -21,6 +21,7 @@ import 'package:video_player/video_player.dart';
 
 import '../controller/poststest_controller.dart';
 import '../controller/videos_controller.dart';
+import '../services/bandservice.dart';
 import '../utils/config.dart';
 
 class VideoTab extends StatefulWidget {
@@ -44,11 +45,13 @@ class _VideoTabState extends State<VideoTab> {
   // ChewieController? chewieController;
   final PoststestController _postsController = Get.put(PoststestController());
   final VideosController _videosController = Get.put(VideosController());
+  final BandService bandService = Get.find();
 
   @override
   void initState() {
     super.initState();
     _videosController.getVideos();
+    bandService.notificationController.getNotifications();
     // _commentsvideoscontroller.getCommentsByvideoid();
     // _isMounted = true; // Set the flag to true when the widget is mounted
   }

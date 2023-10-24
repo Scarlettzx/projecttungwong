@@ -12,8 +12,10 @@ import 'package:project/utils/config.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http_parser/http_parser.dart';
+// import '../components/user.dart';
 import '../data/models/band_model.dart';
 import '../data/models/follower_model.dart';
+import '../data/models/users_model.dart';
 import '../services/bandservice.dart';
 
 class ProfileController extends GetxController {
@@ -22,14 +24,16 @@ class ProfileController extends GetxController {
   // final BandsController bandsController = Get.find<BandsController>();
   // ! อันใหม่
   // final BandsController bandsController = Get.put(BandsController());
-
+  RxString selectType = "User".obs;
   RxList<Map<String, dynamic>> personIdList = RxList<Map<String, dynamic>>();
   RxList<BandDetails> bandDetails = RxList<BandDetails>();
   RxList<PersonDetails> personDetails = RxList<PersonDetails>();
   RxList<BandDetails> bandDetailsfollowing = RxList<BandDetails>();
   RxList<PersonDetails> personDetailfollowing = RxList<PersonDetails>();
+  final RxList<User> allusers = <User>[].obs;
   var isFollowing = false.obs;
   var isEmpty = false.obs;
+  var isAdmin = "".obs;
   final RxInt anotherprofileid = 0.obs;
   final anotherProfileType = "".obs;
   //  List<> memberList = [];
@@ -68,6 +72,37 @@ class ProfileController extends GetxController {
   //   }
   //   isLoading.value = false;
   // }
+  Future<void> getAllProfie() async {
+    isLoading.value = true;
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('token');
+    final headers = {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer $token',
+    };
+    final Uri url = Uri.parse('${Config.endPoint}/api/users/getallusers');
+    final response = await http.get(url, headers: headers);
+    try {
+      if (response.statusCode == 200) {
+        print(response.body);
+        final postsData = usersFromJson(response.body);
+        allusers.assignAll(postsData.users!.whereType<User>());
+        // print(allusers);
+
+        // update();
+      } else if (response.statusCode == 404) {
+        print(response.body);
+      } else {
+        Get.snackbar("Error Loading data",
+            'Server Response: ${response.statusCode}:${response.reasonPhrase.toString()}');
+      }
+    } catch (e) {
+      print(e.toString());
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
   Future<http.Response> editProfile(
       String name, String country, String position, String? filepath) async {
     print(filepath);
@@ -143,6 +178,13 @@ class ProfileController extends GetxController {
         profileList.add(profileModel);
         print(json.encode(profileList));
         print(profileList);
+        print("profileList[0].userIsAdmin");
+        print(profileList[0].userIsAdmin);
+        print("isAdmin.value");
+        print(isAdmin.value);
+        isAdmin.value = profileList[0].userIsAdmin;
+        print("isAdmin.value");
+        print(isAdmin.value);
         // final List<dynamic> result = jsonData["data"] as List<dynamic>;
         // print(result);
         // profileList.value =

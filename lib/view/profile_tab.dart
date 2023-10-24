@@ -39,6 +39,7 @@ class _ProfileTabState extends State<ProfileTab> {
     (bandService.bandsController.isBand.value == false)
         ? bandService.profileController.getProfile()
         : bandService.bandsController.getBand();
+
     // print("bandService.bandsController.isBand.value");
     // print(bandService.bandsController.isBand.value);
     // print("========== Bandid Value ===============");
@@ -52,7 +53,7 @@ class _ProfileTabState extends State<ProfileTab> {
     // bandService.profileController.getProfile();
     // print(bandController.isBand.value);
     // print(bandController.bandid.value);
-
+    bandService.notificationController.getNotifications();
     print("bandService.profileController.profileList[0].userName profile tab");
     print(bandService.profileController.profileList[0].userName);
     bandService.profileController.followerstest();

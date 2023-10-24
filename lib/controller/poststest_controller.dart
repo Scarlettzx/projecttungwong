@@ -102,4 +102,27 @@ class PoststestController extends GetxController {
     displaypost.addAll(filteredPostsIsAdmin);
     print('displaypost length : ${displaypost.length}');
   }
+
+  Future<http.Response> editPost(int postid, String message) async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('token');
+    final url = Uri.parse('${Config.endPoint}/api/poststest/editpost');
+    final headers = {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer $token',
+    };
+    final body = jsonEncode({'post_id': postid, "post_message": message});
+    return await http.patch(url, headers: headers, body: body);
+  }
+  Future<http.Response> deletePost(int postid) async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('token');
+    final url = Uri.parse('${Config.endPoint}/api/poststest/deletepost');
+    final headers = {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer $token',
+    };
+    final body = jsonEncode({'post_id': postid});
+    return await http.delete(url, headers: headers, body: body);
+  }
 }

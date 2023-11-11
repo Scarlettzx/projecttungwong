@@ -82,7 +82,7 @@ class NotificationController extends GetxController {
     }
   }
 
-  Future<http.Response> createNoti() async {
+  Future<http.Response> createNoti(String message) async {
     http.Response? response;
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('token');
@@ -93,8 +93,10 @@ class NotificationController extends GetxController {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',
       };
-      final body = jsonEncode(
-          {'person_id': bandService.profileController.anotherprofileid.value});
+      final body = jsonEncode({
+        'person_id': bandService.profileController.anotherprofileid.value,
+        'message': message
+      });
       response = await http.post(url, headers: headers, body: body);
     } else if (bandService.bandsController.isBand.value == true) {
       final url =
@@ -105,7 +107,8 @@ class NotificationController extends GetxController {
       };
       final body = jsonEncode({
         'band_id': bandService.bandsController.bandid.value,
-        'person_id': bandService.profileController.anotherprofileid.value
+        'person_id': bandService.profileController.anotherprofileid.value,
+        'message': message
       });
       response = await http.post(url, headers: headers, body: body);
     }

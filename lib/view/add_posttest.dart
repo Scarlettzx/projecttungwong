@@ -9,6 +9,7 @@ import 'package:project/view/post_tab.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import '../controller/main_wrapper_controller.dart';
 import '../controller/poststest_controller.dart';
+import '../services/bandservice.dart';
 
 class AddPostTest extends StatefulWidget {
   const AddPostTest({super.key});
@@ -18,7 +19,7 @@ class AddPostTest extends StatefulWidget {
 }
 
 final PoststestController _postsController = Get.find<PoststestController>();
-
+final BandService bandService = Get.find();
 final MainWrapperController _mainWrapperController =
     Get.find<MainWrapperController>();
 
@@ -29,6 +30,8 @@ class _AddPostTestState extends State<AddPostTest> {
   @override
   void initState() {
     // _assetImagesDevice();
+    print("bandService.bandsController.isBand.value");
+    print(bandService.bandsController.isBand.value);
     super.initState();
     _descriptionController = TextEditingController();
   }

@@ -23,6 +23,7 @@ class ProfileController extends GetxController {
   // ! อันเดิม
   // final BandsController bandsController = Get.find<BandsController>();
   // ! อันใหม่
+   final RxBool isvideo = false.obs;
   // final BandsController bandsController = Get.put(BandsController());
   RxString selectType = "User".obs;
   RxList<Map<String, dynamic>> personIdList = RxList<Map<String, dynamic>>();
@@ -31,6 +32,7 @@ class ProfileController extends GetxController {
   RxList<BandDetails> bandDetailsfollowing = RxList<BandDetails>();
   RxList<PersonDetails> personDetailfollowing = RxList<PersonDetails>();
   final RxList<User> allusers = <User>[].obs;
+  RxList<User> displayallUsers = <User>[].obs;
   var isFollowing = false.obs;
   var isEmpty = false.obs;
   var isAdmin = "".obs;
@@ -45,6 +47,7 @@ class ProfileController extends GetxController {
   var useranotherprofile = <ProfileModel>[].obs;
   var profileList = <ProfileModel>[].obs;
   var isLoading = true.obs;
+  var isLoadingsearch = true.obs;
   final RxInt profileid = 0.obs;
   final selectedList = "followers".obs;
   // Initialize profileDetail as an RxMap<String, dynamic>?
@@ -72,6 +75,21 @@ class ProfileController extends GetxController {
   //   }
   //   isLoading.value = false;
   // }
+
+  Future<http.Response> changePassword(
+      String oldpassword, String newpassword) async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('token');
+    final Uri url = Uri.parse('${Config.endPoint}/api/users/changepassword');
+    final headers = {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer $token',
+    };
+    final body =
+        jsonEncode({'oldpassword': oldpassword, "newpassword": newpassword});
+    return await http.patch(url, headers: headers, body: body);
+  }
+
   Future<void> getAllProfie() async {
     isLoading.value = true;
     final prefs = await SharedPreferences.getInstance();
@@ -87,6 +105,7 @@ class ProfileController extends GetxController {
         print(response.body);
         final postsData = usersFromJson(response.body);
         allusers.assignAll(postsData.users!.whereType<User>());
+        update_();
         // print(allusers);
 
         // update();
@@ -206,6 +225,7 @@ class ProfileController extends GetxController {
 // ! getuserAnotherprofile
   Future<void> getuserAnotherProfile() async {
     // print(profileid.value);
+    // isLoading.value = true;
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('token');
     final headers = {
@@ -215,6 +235,7 @@ class ProfileController extends GetxController {
     final Uri url = Uri.parse(
         '${Config.endPoint}/api/users/getbyuserid/${anotherprofileid.value}');
     final response = await http.get(url, headers: headers);
+
     try {
       if (response.statusCode == 200) {
 // 1. แปลง JSON ใน 'data' เป็น Map
@@ -229,7 +250,7 @@ class ProfileController extends GetxController {
         useranotherprofile.add(profileModel);
         print(json.encode(useranotherprofile));
         print(useranotherprofile);
-        isLoading.value = false;
+
         // update();
       } else if (response.statusCode == 404) {
         print(response.body);
@@ -239,11 +260,14 @@ class ProfileController extends GetxController {
       }
     } catch (e) {
       print(e.toString());
+    } finally {
+      isLoading.value = false;
     }
   }
 
 // ! getbandAnotherprofile
   Future<void> getbandAnotherprofile() async {
+    // isLoading.value = true;
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('token');
     final Uri url = Uri.parse(
@@ -254,6 +278,7 @@ class ProfileController extends GetxController {
       'Authorization': 'Bearer $token',
     };
     final response = await http.get(url, headers: headers);
+
     try {
       if (response.statusCode == 200) {
         print(response.body);
@@ -277,6 +302,8 @@ class ProfileController extends GetxController {
       }
     } catch (e) {
       print(e.toString());
+    } finally {
+      isLoading.value = false;
     }
   }
 
@@ -858,5 +885,11 @@ class ProfileController extends GetxController {
   @override
   void onClose() {
     super.onClose();
+  }
+
+  void update_() {
+    displayallUsers.value = []; // ลบค่าเก่าทิ้ง
+    displayallUsers.addAll(allusers); // เพิ่ม post ที่ผ่านการ where
+    print('displaypost length : ${displayallUsers.length}');
   }
 }

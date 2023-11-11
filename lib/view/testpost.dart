@@ -16,6 +16,7 @@ import 'package:liquid_pull_to_refresh/liquid_pull_to_refresh.dart';
 import '../controller/comments_post_controller.dart';
 import '../controller/main_wrapper_controller.dart';
 import '../controller/poststest_controller.dart';
+import '../controller/reports.controller.dart';
 import '../data/models/dropdown_province_model.dart';
 import '../pages/api_provider.dart';
 import '../services/bandservice.dart';
@@ -35,8 +36,10 @@ class _TestsPostTabState extends State<TestsPostTab> {
   ApiProvider apiProvider = ApiProvider();
   final BandService bandService = Get.find();
   // late int editpostid = 0;
+  
   static final ScrollController _scrollController = ScrollController();
   final PoststestController _postsController = Get.put(PoststestController());
+  final ReportsController _reportsController = Get.put(ReportsController());
   final TextEditingController __editpostController = TextEditingController();
   final CommentsPostController _commentspostscontroller =
       Get.put(CommentsPostController());
@@ -74,11 +77,13 @@ class _TestsPostTabState extends State<TestsPostTab> {
     bandService.notificationController.getNotifications();
     // _postsController.update_displaypost();
     displaypost = _postsController.displaypost;
+    _postsController.hiddenpostAdmin.value = false;
+    bandService.profileController.isvideo.value = false;
     // print("bandService.profileController.profileList[0].userIsAdmin");
     // print(bandService.profileController.profileList[0].userIsAdmin);
     // print(_postsController.posts);
-    // print("bandService.profileController.isAdmin.value");
-    // print(bandService.profileController.isAdmin.value);
+    print("bandService.bandsController.isBand.value");
+    print(bandService.bandsController.isBand.value);
     print("displaypost");
     print(displaypost);
   }
@@ -322,6 +327,11 @@ class _TestsPostTabState extends State<TestsPostTab> {
               title: Padding(
                 padding: const EdgeInsets.all(10.0),
                 child: TextFormField(
+                  style: TextStyle(
+                    color: Theme.of(context).brightness == Brightness.light
+                        ? Colors.black // สีสำหรับ Light Theme
+                        : ColorConstants.appColors,
+                  ),
                   decoration: InputDecoration(
                     filled: true,
                     fillColor: const Color.fromARGB(255, 255, 255, 255),
@@ -333,6 +343,10 @@ class _TestsPostTabState extends State<TestsPostTab> {
                       color: Colors.black,
                     ),
                     hintText: 'ข้อมูลที่ต้องการค้นหา',
+                    hintStyle: TextStyle(
+                        color: Theme.of(context).brightness == Brightness.light
+                            ? Colors.black // สีสำหรับ Light Theme
+                            : ColorConstants.appColors),
                     contentPadding: EdgeInsets.only(
                       left: 15.0,
                     ),
@@ -343,7 +357,6 @@ class _TestsPostTabState extends State<TestsPostTab> {
                     // setState(() {}),
                     print(selectedUsername)
                   },
-                  style: const TextStyle(color: Color.fromARGB(255, 0, 0, 0)),
                 ),
               ),
             ),
@@ -361,7 +374,10 @@ class _TestsPostTabState extends State<TestsPostTab> {
                               child: DropdownButtonFormField(
                                 menuMaxHeight: 700,
                                 style: TextStyle(
-                                  color: ColorConstants.gray600,
+                                  color: Theme.of(context).brightness ==
+                                          Brightness.light
+                                      ? Colors.black // สีสำหรับ Light Theme
+                                      : ColorConstants.appColors,
                                 ),
                                 decoration: InputDecoration(
                                   hintText: "Select Province",
@@ -414,6 +430,12 @@ class _TestsPostTabState extends State<TestsPostTab> {
                               width: 150,
                               // height: 100,
                               child: DropdownButtonFormField(
+                                style: TextStyle(
+                                  color: Theme.of(context).brightness ==
+                                          Brightness.light
+                                      ? Colors.black // สีสำหรับ Light Theme
+                                      : ColorConstants.appColors,
+                                ),
                                 menuMaxHeight: 200,
                                 value: selectedRole,
                                 items: itemsRole.map((item) {
@@ -488,493 +510,351 @@ class _TestsPostTabState extends State<TestsPostTab> {
                               displaypost[reverseindex].postCreateAt!;
                           final isBand =
                               (displaypost[reverseindex].bandDetails != null);
+                          // final isBand =
+                          //     (displaypost[reverseindex].bandDetails != null);
                           // ! showpostsBand
                           if (isBand) {
-                            return Slidable(
-                              endActionPane: ActionPane(
-                                  // extentRatio: 0.3,
+                            if (displaypost[reverseindex].postIsHide !=
+                                "true") {
+                              return Slidable(
+                                endActionPane: ActionPane(
+                                    // extentRatio: 0.3,
 
-                                  motion: const StretchMotion(),
-                                  children: [
-                                    if ((bandService
-                                                .bandsController.isBand.value ==
-                                            true) &&
-                                        (displaypost[reverseindex]
-                                                .bandDetails!
-                                                .bandId ==
-                                            bandService.bandsController.bandid
-                                                .value)) ...[
-                                      SlidableAction(
-                                        flex: 3,
-                                        onPressed: ((context) {
-                                          __editpostController.clear();
-                                          Get.defaultDialog(
-                                            title: '',
-                                            content: Form(
-                                              key: _keyForm,
-                                              child: Column(
-                                                mainAxisAlignment:
-                                                    MainAxisAlignment.center,
-                                                children: [
-                                                  TextFormField(
-                                                    cursorColor: ColorConstants
-                                                        .appColors,
-                                                    validator:
-                                                        _checkeditPostValidator,
-                                                    controller:
-                                                        __editpostController,
-                                                    keyboardType:
-                                                        TextInputType.text,
-                                                    maxLines: 1,
-                                                    decoration:
-                                                        const InputDecoration(
-                                                      labelText: 'Message',
-                                                      hintMaxLines: 1,
-                                                      border:
-                                                          OutlineInputBorder(
-                                                        borderSide: BorderSide(
-                                                            color: Colors.green,
-                                                            width: 4.0),
+                                    motion: const StretchMotion(),
+                                    children: [
+                                      if ((bandService.bandsController.isBand
+                                                  .value ==
+                                              true) &&
+                                          (displaypost[reverseindex]
+                                                  .bandDetails!
+                                                  .bandId ==
+                                              bandService.bandsController.bandid
+                                                  .value)) ...[
+                                        SlidableAction(
+                                          flex: 3,
+                                          onPressed: ((context) {
+                                            __editpostController.clear();
+                                            Get.defaultDialog(
+                                              title: '',
+                                              content: Form(
+                                                key: _keyForm,
+                                                child: Column(
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment.center,
+                                                  children: [
+                                                    TextFormField(
+                                                      cursorColor:
+                                                          ColorConstants
+                                                              .appColors,
+                                                      validator:
+                                                          _checkeditPostValidator,
+                                                      controller:
+                                                          __editpostController,
+                                                      keyboardType:
+                                                          TextInputType.text,
+                                                      maxLines: 1,
+                                                      decoration:
+                                                          const InputDecoration(
+                                                        labelText: 'Message',
+                                                        hintMaxLines: 1,
+                                                        border:
+                                                            OutlineInputBorder(
+                                                          borderSide:
+                                                              BorderSide(
+                                                                  color: Colors
+                                                                      .green,
+                                                                  width: 4.0),
+                                                        ),
                                                       ),
                                                     ),
-                                                  ),
-                                                  SizedBox(
-                                                    height: 30.0,
-                                                  ),
-                                                  ElevatedButton(
-                                                    onPressed: () async {
-                                                      if (_keyForm.currentState!
-                                                          .validate()) {
-                                                        await doEditPost(
-                                                            context, postid!);
-                                                        Get.back();
-                                                      }
-                                                    },
-                                                    style: ButtonStyle(
-                                                      padding:
-                                                          MaterialStateProperty
-                                                              .all<EdgeInsets>(
-                                                        const EdgeInsets
-                                                                .symmetric(
-                                                            horizontal: 20.0),
-                                                      ),
-                                                      backgroundColor:
-                                                          MaterialStateProperty
-                                                              .all<Color>(
-                                                        Color.fromARGB(
-                                                            255, 35, 236, 193),
-                                                      ),
+                                                    SizedBox(
+                                                      height: 30.0,
                                                     ),
-                                                    child: const Text(
-                                                      'EDIT SAVE',
-                                                      style: TextStyle(
-                                                        color: Colors.white,
-                                                        fontSize: 16.0,
+                                                    ElevatedButton(
+                                                      onPressed: () async {
+                                                        if (_keyForm
+                                                            .currentState!
+                                                            .validate()) {
+                                                          await doEditPost(
+                                                              context, postid!);
+                                                          Get.back();
+                                                        }
+                                                      },
+                                                      style: ButtonStyle(
+                                                        padding:
+                                                            MaterialStateProperty
+                                                                .all<
+                                                                    EdgeInsets>(
+                                                          const EdgeInsets
+                                                                  .symmetric(
+                                                              horizontal: 20.0),
+                                                        ),
+                                                        backgroundColor:
+                                                            MaterialStateProperty
+                                                                .all<Color>(
+                                                          Color.fromARGB(255,
+                                                              35, 236, 193),
+                                                        ),
                                                       ),
-                                                    ),
-                                                  )
-                                                ],
-                                              ),
-                                            ),
-                                            radius: 10.0,
-                                          );
-                                        }),
-                                        backgroundColor: Colors.amber,
-                                        icon: IconlyBold.edit,
-                                        foregroundColor: Colors.white,
-                                      )
-                                    ],
-                                    if ((bandService
-                                                .bandsController.isBand.value ==
-                                            true) &&
-                                        (displaypost[reverseindex]
-                                                .bandDetails!
-                                                .bandId ==
-                                            bandService.bandsController.bandid
-                                                .value)) ...[
-                                      SlidableAction(
-                                        flex: 3,
-                                        onPressed: ((context) async {
-                                          await doDeletePost(context, postid!);
-                                        }),
-                                        backgroundColor: Colors.red,
-                                        icon: IconlyBold.delete,
-                                        foregroundColor: Colors.white,
-                                      )
-                                    ],
-                                    if (bandService.profileController.isAdmin
-                                                .value !=
-                                            "true" &&
-                                        displaypost[reverseindex]
-                                                .bandDetails!
-                                                .bandId !=
-                                            bandService.bandsController.bandid
-                                                .value) ...[
-                                      SlidableAction(
-                                        flex: 4,
-                                        onPressed: ((context) {}),
-                                        backgroundColor:
-                                            ColorConstants.unfollow,
-                                        icon: Icons.report_rounded,
-                                        foregroundColor: Colors.white,
-                                      )
-                                    ],
-                                  ]),
-                              child: Card(
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(20.0),
-                                ),
-                                elevation: 8,
-                                margin: const EdgeInsets.all(15),
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(20),
-                                    border: Border.all(
-                                        color: ColorConstants.appColors,
-                                        width: 0.7),
-                                  ),
-                                  child: Padding(
-                                    padding: const EdgeInsets.only(
-                                        right: 20,
-                                        top: 10,
-                                        left: 20,
-                                        bottom: 20),
-                                    child: Column(children: [
-                                      Row(
-                                        children: [
-                                          Padding(
-                                            padding:
-                                                const EdgeInsets.only(top: 30),
-                                            child: InkWell(
-                                              splashColor: Colors.transparent,
-                                              highlightColor:
-                                                  Colors.transparent,
-                                              onTap: () async {
-                                                var bandid =
-                                                    displaypost[reverseindex]
-                                                        .bandDetails!
-                                                        .bandId;
-                                                // ! เอาค่าbandidเก็บใน anotherprofileid เพื่อจะเข้า method
-                                                bandService
-                                                    .profileController
-                                                    .anotherprofileid
-                                                    .value = bandid!;
-                                                bandService
-                                                    .profileController
-                                                    .anotherProfileType
-                                                    .value = "band";
-                                                // bandService
-                                                //     .bandsController
-                                                //     .anotherbandid
-                                                //     .value = bandid;
-                                                print(bandService
-                                                    .profileController
-                                                    .anotherProfileType
-                                                    .value);
-                                                print(bandService
-                                                    .profileController
-                                                    .anotherprofileid
-                                                    .value);
-                                                try {
-                                                  await bandService
-                                                      .profileController
-                                                      .checkfollow();
-                                                  await bandService
-                                                      .notificationController
-                                                      .checkSendEmail();
-                                                } catch (e) {
-                                                  print("Error: $e");
-                                                  // Handle the error as needed
-                                                }
-
-                                                // bandService.notificationController
-                                                //     .checkInviteBand();
-                                                Get.to(
-                                                    transition:
-                                                        Transition.downToUp,
-                                                    AnotherProfileTab(
-                                                      anotherpofileid: bandid,
-                                                    ));
-                                              },
-                                              child: CircleAvatar(
-                                                backgroundColor:
-                                                    Colors.transparent,
-                                                backgroundImage: NetworkImage(
-                                                    '${Config.getImageBand}${displaypost[reverseindex].bandDetails!.bandAvatar}'),
-                                                radius: 30,
-                                              ),
-                                            ),
-                                          ),
-                                          SizedBox(width: 20),
-                                          Column(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
-                                            children: [
-                                              Container(
-                                                  width: 250,
-                                                  height: 30,
-                                                  color: Colors.transparent,
-                                                  child: Stack(children: [
-                                                    Text(
-                                                      displaypost[reverseindex]
-                                                          .bandDetails!
-                                                          .bandName!,
-                                                      style: TextStyle(
-                                                        fontSize: 20,
-                                                        fontWeight:
-                                                            FontWeight.bold,
+                                                      child: const Text(
+                                                        'EDIT SAVE',
+                                                        style: TextStyle(
+                                                          color: Colors.white,
+                                                          fontSize: 16.0,
+                                                        ),
                                                       ),
-                                                    ),
-                                                  ])),
-                                              SizedBox(
-                                                height: 10,
-                                              ),
-                                              Align(
-                                                alignment: Alignment.centerLeft,
-                                                child: Text(
-                                                  displaypost[reverseindex]
-                                                      .bandDetails!
-                                                      .bandCategory!,
-                                                  style: TextStyle(
-                                                    fontSize: 14,
-                                                  ),
+                                                    )
+                                                  ],
                                                 ),
                                               ),
-                                            ],
-                                          ),
-                                        ],
-                                      ),
-                                      SizedBox(
-                                        height: 50,
-                                      ),
-                                      Align(
-                                        alignment: Alignment.centerLeft,
-                                        child: Text(displaypost[reverseindex]
-                                            .postMessage!),
-                                      ),
-                                      SizedBox(
-                                        height: 10,
-                                      ),
-                                      Divider(
-                                        thickness: 2,
-                                      ),
-                                      Row(
-                                        children: [
-                                          IconButton(
-                                            onPressed: () {},
-                                            icon: Icon(
-                                              Icons.favorite_sharp,
-                                              size: 30,
-                                            ),
-                                          ),
-                                          SizedBox(
-                                            width: 10,
-                                          ),
-                                          IconButton(
-                                            onPressed: () {
-                                              _commentspostscontroller
-                                                  .postid.value = postid!;
-                                              print(
-                                                  "_commentspostscontroller.postid.value");
-                                              print(_commentspostscontroller
-                                                  .postid.value);
-                                              _commentspostscontroller
-                                                  .getCommentsBypostid();
-                                              Get.to(
-                                                PostMessage(
-                                                    displaypost[reverseindex]
-                                                        .postMessage!),
-                                                transition: Transition
-                                                    .downToUp, // ใช้ transition ตรงนี้
-                                              );
-                                            },
-                                            icon: Icon(
-                                              Icons.comment_rounded,
-                                              size: 30,
-                                            ),
-                                          ),
-                                          SizedBox(width: 80),
-                                          Text(GetTimeAgo.parse(datetime))
-                                        ],
-                                      )
+                                              radius: 10.0,
+                                            );
+                                          }),
+                                          backgroundColor: Colors.amber,
+                                          icon: IconlyBold.edit,
+                                          foregroundColor: Colors.white,
+                                        )
+                                      ],
+                                      if ((bandService.bandsController.isBand
+                                                  .value ==
+                                              true) &&
+                                          (displaypost[reverseindex]
+                                                  .bandDetails!
+                                                  .bandId ==
+                                              bandService.bandsController.bandid
+                                                  .value)) ...[
+                                        SlidableAction(
+                                          flex: 3,
+                                          onPressed: ((context) async {
+                                            await doDeletePost(
+                                                context, postid!);
+                                          }),
+                                          backgroundColor: Colors.red,
+                                          icon: IconlyBold.delete,
+                                          foregroundColor: Colors.white,
+                                        )
+                                      ],
+                                      if (bandService.profileController.isAdmin
+                                                  .value !=
+                                              "true" &&
+                                          displaypost[reverseindex]
+                                                  .bandDetails!
+                                                  .bandId !=
+                                              bandService.bandsController.bandid
+                                                  .value) ...[
+                                        SlidableAction(
+                                          flex: 4,
+                                          onPressed: ((context) async {
+                                            _reportsController.postid.value =
+                                                postid!;
+                                            await docreateReport(context);
+                                          }),
+                                          backgroundColor:
+                                              ColorConstants.unfollow,
+                                          icon: Icons.report_rounded,
+                                          foregroundColor: Colors.white,
+                                        )
+                                      ],
                                     ]),
+                                child: Card(
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(20.0),
+                                  ),
+                                  elevation: 8,
+                                  margin: const EdgeInsets.all(15),
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(20),
+                                      border: Border.all(
+                                          color: ColorConstants.appColors,
+                                          width: 0.7),
+                                    ),
+                                    child: Padding(
+                                      padding: const EdgeInsets.only(
+                                          right: 20,
+                                          top: 10,
+                                          left: 20,
+                                          bottom: 20),
+                                      child: Column(children: [
+                                        Row(
+                                          children: [
+                                            Padding(
+                                              padding: const EdgeInsets.only(
+                                                  top: 30),
+                                              child: InkWell(
+                                                splashColor: Colors.transparent,
+                                                highlightColor:
+                                                    Colors.transparent,
+                                                onTap: () async {
+                                                  var bandid =
+                                                      displaypost[reverseindex]
+                                                          .bandDetails!
+                                                          .bandId;
+                                                  // ! เอาค่าbandidเก็บใน anotherprofileid เพื่อจะเข้า method
+                                                  bandService
+                                                      .profileController
+                                                      .anotherprofileid
+                                                      .value = bandid!;
+                                                  bandService
+                                                      .profileController
+                                                      .anotherProfileType
+                                                      .value = "band";
+                                                  // bandService
+                                                  //     .bandsController
+                                                  //     .anotherbandid
+                                                  //     .value = bandid;
+                                                  print(bandService
+                                                      .profileController
+                                                      .anotherProfileType
+                                                      .value);
+                                                  print(bandService
+                                                      .profileController
+                                                      .anotherprofileid
+                                                      .value);
+                                                  try {
+                                                    await bandService
+                                                        .profileController
+                                                        .checkfollow();
+                                                    await bandService
+                                                        .notificationController
+                                                        .checkSendEmail();
+                                                  } catch (e) {
+                                                    print("Error: $e");
+                                                    // Handle the error as needed
+                                                  }
+
+                                                  // bandService.notificationController
+                                                  //     .checkInviteBand();
+                                                  Get.to(
+                                                      transition:
+                                                          Transition.downToUp,
+                                                      AnotherProfileTab(
+                                                        anotherpofileid: bandid,
+                                                      ));
+                                                },
+                                                child: CircleAvatar(
+                                                  backgroundColor:
+                                                      Colors.transparent,
+                                                  backgroundImage: NetworkImage(
+                                                      '${Config.getImageBand}${displaypost[reverseindex].bandDetails!.bandAvatar}'),
+                                                  radius: 30,
+                                                ),
+                                              ),
+                                            ),
+                                            SizedBox(width: 20),
+                                            Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                Container(
+                                                    width: 250,
+                                                    height: 30,
+                                                    color: Colors.transparent,
+                                                    child: Stack(children: [
+                                                      Text(
+                                                        displaypost[
+                                                                reverseindex]
+                                                            .bandDetails!
+                                                            .bandName!,
+                                                        style: TextStyle(
+                                                          fontSize: 20,
+                                                          fontWeight:
+                                                              FontWeight.bold,
+                                                        ),
+                                                      ),
+                                                    ])),
+                                                SizedBox(
+                                                  height: 10,
+                                                ),
+                                                Align(
+                                                  alignment:
+                                                      Alignment.centerLeft,
+                                                  child: Text(
+                                                    displaypost[reverseindex]
+                                                        .bandDetails!
+                                                        .bandCategory!,
+                                                    style: TextStyle(
+                                                      fontSize: 14,
+                                                    ),
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ],
+                                        ),
+                                        SizedBox(
+                                          height: 50,
+                                        ),
+                                        Align(
+                                          alignment: Alignment.centerLeft,
+                                          child: Text(displaypost[reverseindex]
+                                              .postMessage!),
+                                        ),
+                                        SizedBox(
+                                          height: 10,
+                                        ),
+                                        Divider(
+                                          thickness: 2,
+                                        ),
+                                        Row(
+                                          children: [
+                                            // IconButton(
+                                            //   onPressed: () {},
+                                            //   icon: Icon(
+                                            //     Icons.favorite_sharp,
+                                            //     size: 30,
+                                            //   ),
+                                            // ),
+                                            SizedBox(
+                                              width: 10,
+                                            ),
+                                            IconButton(
+                                              onPressed: () {
+                                                _commentspostscontroller
+                                                    .postid.value = postid!;
+                                                print(
+                                                    "_commentspostscontroller.postid.value");
+                                                print(_commentspostscontroller
+                                                    .postid.value);
+                                                _commentspostscontroller
+                                                    .getCommentsBypostid();
+                                                Get.to(
+                                                  PostMessage(
+                                                      displaypost[reverseindex]
+                                                          .postMessage!),
+                                                  transition: Transition
+                                                      .downToUp, // ใช้ transition ตรงนี้
+                                                );
+                                              },
+                                              icon: Icon(
+                                                Icons.comment_rounded,
+                                                size: 30,
+                                              ),
+                                            ),
+                                            SizedBox(width: 2),
+                                            Text(
+                                                '${displaypost[reverseindex].countComment}'),
+                                            SizedBox(width: 80),
+                                            Text(GetTimeAgo.parse(datetime))
+                                          ],
+                                        )
+                                      ]),
+                                    ),
                                   ),
                                 ),
-                              ),
-                            );
+                              );
+                            }
                             // ! Showpostuser
                           } else if (displaypost[reverseindex]
                                   .personDetails
                                   ?.userIsAdmin ==
                               'true') {
-                            return Card(
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(20.0),
-                              ),
-                              elevation: 8,
-                              margin: const EdgeInsets.all(15),
-                              child: AnimatedContainer(
-                                duration: Duration(seconds: 1),
-                                decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(20),
-                                    border: Border.all(width: 1),
-                                    color: Colors.lightBlue[100]),
-                                child: Padding(
-                                  padding: const EdgeInsets.only(
-                                      right: 20, top: 10, left: 20, bottom: 20),
-                                  child: Column(children: [
-                                    Row(
-                                      children: [
-                                        Padding(
-                                          padding:
-                                              const EdgeInsets.only(top: 30),
-                                          child: InkWell(
-                                            splashColor: Colors.transparent,
-                                            highlightColor: Colors.transparent,
-                                            onTap: () {
-                                              var userid =
-                                                  displaypost[reverseindex]
-                                                      .personDetails!
-                                                      .userId;
-                                              bandService
-                                                  .profileController
-                                                  .anotherprofileid
-                                                  .value = userid!;
-                                              bandService
-                                                  .profileController
-                                                  .anotherProfileType
-                                                  .value = "user";
-                                              // print(bandService.profileController
-                                              //     .anotherProfileType.value);
-                                              // print(bandService.profileController
-                                              //     .anotherprofileid.value);
-                                              bandService.profileController
-                                                  .checkfollow();
-                                            },
-                                            child: CircleAvatar(
-                                              backgroundColor:
-                                                  Colors.transparent,
-                                              backgroundImage: NetworkImage(
-                                                  '${Config.getImage}${displaypost[reverseindex].personDetails!.userAvatar}'),
-                                              radius: 30,
-                                            ),
-                                          ),
-                                        ),
-                                        SizedBox(width: 20),
-                                        Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            Row(children: [
-                                              Container(
-                                                  width: 250,
-                                                  height: 30,
-                                                  color: Colors.transparent,
-                                                  child: Stack(children: [
-                                                    Text(
-                                                      displaypost[reverseindex]
-                                                          .personDetails!
-                                                          .userName!,
-                                                      style: TextStyle(
-                                                        fontSize: 20,
-                                                        fontWeight:
-                                                            FontWeight.bold,
-                                                      ),
-                                                    ),
-                                                    Align(
-                                                      alignment:
-                                                          Alignment.topRight,
-                                                      child: Lottie.asset(
-                                                          'assets/animation_lnlv8zw0.json',
-                                                          width: MediaQuery.of(
-                                                                      context)
-                                                                  .size
-                                                                  .width *
-                                                              0.1,
-                                                          height: MediaQuery.of(
-                                                                      context)
-                                                                  .size
-                                                                  .width *
-                                                              0.1,
-                                                          fit: BoxFit.fill),
-                                                    ),
-                                                  ])),
-                                            ]),
-                                            SizedBox(
-                                              height: 10,
-                                            ),
-                                            Align(
-                                              alignment: Alignment.centerLeft,
-                                              child: Text(
-                                                displaypost[reverseindex]
-                                                    .personDetails!
-                                                    .userPosition!,
-                                                style: TextStyle(
-                                                  fontSize: 14,
-                                                ),
-                                              ),
-                                            ),
-                                            SizedBox(
-                                              height: 10,
-                                            ),
-                                            Align(
-                                              alignment: Alignment.centerLeft,
-                                              child: Text(
-                                                displaypost[reverseindex]
-                                                    .personDetails!
-                                                    .userCountry!,
-                                                style: TextStyle(
-                                                  fontSize: 12,
-                                                ),
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ],
-                                    ),
-                                    SizedBox(
-                                      height: 50,
-                                    ),
-                                    Align(
-                                      alignment: Alignment.centerLeft,
-                                      child: Text(displaypost[reverseindex]
-                                          .postMessage!),
-                                    ),
-                                    SizedBox(
-                                      height: 10,
-                                    ),
-                                    Divider(
-                                      thickness: 2,
-                                    ),
-                                    Row(
-                                      children: [
-                                        IconButton(
-                                          onPressed: () {},
-                                          icon: Icon(
-                                            Icons.favorite_sharp,
-                                            size: 30,
-                                          ),
-                                        ),
-                                        SizedBox(
-                                          width: 10,
-                                        ),
-                                        IconButton(
-                                          onPressed: () {},
-                                          icon: Icon(
-                                            Icons.comment_rounded,
-                                            size: 30,
-                                          ),
-                                        ),
-                                        SizedBox(width: 80),
-                                        Text(GetTimeAgo.parse(datetime))
-                                      ],
-                                    )
-                                  ]),
-                                ),
-                              ),
-                            );
-                          } else {
                             return Slidable(
+                              enabled: (bandService
+                                          .profileController.isAdmin.value ==
+                                      'true')
+                                  ? true
+                                  : false,
                               endActionPane: ActionPane(
                                   // extentRatio: 0.3,
                                   motion: const StretchMotion(),
@@ -1095,7 +975,11 @@ class _TestsPostTabState extends State<TestsPostTab> {
                                                 .profileid.value) ...[
                                       SlidableAction(
                                         flex: 4,
-                                        onPressed: ((context) {}),
+                                        onPressed: ((context) async {
+                                          _reportsController.postid.value =
+                                              postid!;
+                                          await docreateReport(context);
+                                        }),
                                         backgroundColor:
                                             ColorConstants.unfollow,
                                         icon: Icons.report_rounded,
@@ -1103,200 +987,788 @@ class _TestsPostTabState extends State<TestsPostTab> {
                                       )
                                     ]
                                   ]),
-                              child: Card(
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(20.0),
-                                ),
-                                elevation: 8,
-                                margin: const EdgeInsets.all(15),
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(20),
-                                    border: Border.all(
-                                        color: ColorConstants.appColors,
-                                        width: 0.7),
-                                  ),
-                                  child: Padding(
-                                    padding: const EdgeInsets.only(
-                                        right: 20,
-                                        top: 10,
-                                        left: 20,
-                                        bottom: 20),
-                                    child: Column(children: [
-                                      Row(
-                                        children: [
-                                          Padding(
-                                            padding:
-                                                const EdgeInsets.only(top: 30),
-                                            child: InkWell(
-                                              splashColor: Colors.transparent,
-                                              highlightColor:
-                                                  Colors.transparent,
-                                              onTap: () async {
-                                                var userid =
-                                                    displaypost[reverseindex]
-                                                        .personDetails!
-                                                        .userId;
-                                                bandService
-                                                    .profileController
-                                                    .anotherprofileid
-                                                    .value = userid!;
-                                                bandService
-                                                    .profileController
-                                                    .anotherProfileType
-                                                    .value = "user";
-                                                print(bandService
-                                                    .profileController
-                                                    .anotherProfileType
-                                                    .value);
-                                                print(bandService
-                                                    .profileController
-                                                    .anotherprofileid
-                                                    .value);
-                                                try {
-                                                  await bandService
-                                                      .profileController
-                                                      .checkfollow();
-                                                  await bandService
-                                                      .notificationController
-                                                      .checkInviteBand();
-                                                  await bandService
-                                                      .notificationController
-                                                      .checkSendEmail();
-                                                } catch (e) {
-                                                  print("Error: $e");
-                                                  // Handle the error as needed
-                                                }
-                                                Get.to(
-                                                    transition:
-                                                        Transition.downToUp,
-                                                    AnotherProfileTab(
-                                                      anotherpofileid: userid,
-                                                    ));
-                                              },
-                                              child: CircleAvatar(
-                                                backgroundColor:
-                                                    Colors.transparent,
-                                                backgroundImage: NetworkImage(
-                                                    '${Config.getImage}${displaypost[reverseindex].personDetails!.userAvatar}'),
-                                                radius: 30,
-                                              ),
-                                            ),
-                                          ),
-                                          SizedBox(width: 20),
-                                          Column(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
-                                            children: [
-                                              Container(
-                                                  width: 250,
-                                                  height: 30,
-                                                  color: Colors.transparent,
-                                                  child: Stack(children: [
-                                                    Text(
-                                                      displaypost[reverseindex]
-                                                          .personDetails!
-                                                          .userName!,
-                                                      style: TextStyle(
-                                                        fontSize: 20,
-                                                        fontWeight:
-                                                            FontWeight.bold,
+                              child: (_postsController.hiddenpostAdmin.value ==
+                                      false)
+                                  ? Card(
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius:
+                                            BorderRadius.circular(20.0),
+                                      ),
+                                      elevation: 8,
+                                      margin: const EdgeInsets.all(15),
+                                      child: InkWell(
+                                        borderRadius: BorderRadius.all(
+                                            Radius.circular(20)),
+                                        onLongPress: () {
+                                          Get.dialog(
+                                            Column(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.center,
+                                              children: [
+                                                Padding(
+                                                  padding: const EdgeInsets
+                                                          .symmetric(
+                                                      horizontal: 40),
+                                                  child: Container(
+                                                    decoration:
+                                                        const BoxDecoration(
+                                                      color: Colors.white,
+                                                      borderRadius:
+                                                          BorderRadius.all(
+                                                        Radius.circular(20),
                                                       ),
                                                     ),
-                                                    //   Positioned(
-                                                    //     right: 20,
-                                                    //     child: Container(
-                                                    //         child: userPositionIcon),
-                                                    //   )
-                                                  ])),
-                                              SizedBox(
-                                                height: 10,
-                                              ),
-                                              Align(
-                                                alignment: Alignment.centerLeft,
-                                                child: Text(
-                                                  displaypost[reverseindex]
-                                                      .personDetails!
-                                                      .userPosition!,
-                                                  style: TextStyle(
-                                                    fontSize: 14,
+                                                    child: Padding(
+                                                      padding:
+                                                          const EdgeInsets.all(
+                                                              20.0),
+                                                      child: Material(
+                                                        color:
+                                                            Colors.transparent,
+                                                        child: Column(
+                                                          children: [
+                                                            const SizedBox(
+                                                                height: 10),
+                                                            // checkmemberonTap
+                                                            Text(
+                                                              "Do you want to hide admin posts?",
+                                                              style: TextStyle(
+                                                                  fontSize: 16,
+                                                                  fontWeight:
+                                                                      FontWeight
+                                                                          .bold,
+                                                                  color: Colors
+                                                                          .grey[
+                                                                      600] // ,
+                                                                  ),
+                                                              textAlign:
+                                                                  TextAlign
+                                                                      .center,
+                                                            ),
+                                                            const SizedBox(
+                                                                height: 20),
+                                                            //Buttons
+                                                            Row(
+                                                              children: [
+                                                                Expanded(
+                                                                  child: ElevatedButton(
+                                                                      child: const Text(
+                                                                        'YES',
+                                                                      ),
+                                                                      style: ElevatedButton.styleFrom(
+                                                                        minimumSize: const Size(
+                                                                            0,
+                                                                            45),
+                                                                        primary:
+                                                                            ColorConstants.appColors,
+                                                                        onPrimary:
+                                                                            const Color(0xFFFFFFFF),
+                                                                        shape:
+                                                                            RoundedRectangleBorder(
+                                                                          borderRadius:
+                                                                              BorderRadius.circular(8),
+                                                                        ),
+                                                                      ),
+                                                                      onPressed: () {
+                                                                        _postsController
+                                                                            .hiddenpostAdmin
+                                                                            .value = true;
+                                                                        setState(
+                                                                            () {});
+                                                                        Get.back();
+
+                                                                        // if (checkmemberonTap) {
+                                                                        //   bandService
+                                                                        //       .bandsController
+                                                                        //       .leaveband()
+                                                                        //       .then(
+                                                                        //     (value) {
+                                                                        //       bandService
+                                                                        //           .bandsController
+                                                                        //           .checkBand();
+                                                                        //       Get.back();
+                                                                        //       // bandService.bandsController.memberList.remove(memberListdata);
+                                                                        //     },
+                                                                        //   );
+                                                                        // } else {
+                                                                        //   bandService
+                                                                        //           .bandsController
+                                                                        //           .kickpersonid
+                                                                        //           .value =
+                                                                        //       memberListdata
+                                                                        //           .userId;
+                                                                        //   bandService
+                                                                        //       .bandsController
+                                                                        //       .kickuserOutband()
+                                                                        //       .then(
+                                                                        //     (value) {
+                                                                        //       // bandService.bandsController.memberList.remove(memberListdata);
+                                                                        //       setState(
+                                                                        //           () {});
+                                                                        //       Get.back();
+                                                                        //     },
+                                                                        //   );
+                                                                        // }
+
+                                                                        // bandService.bandsController.().then(
+                                                                        //   (value) {
+                                                                        //     Get.back();
+                                                                        //     setState(() {});
+                                                                        //   },
+                                                                        // );
+                                                                      }),
+                                                                ),
+                                                                const SizedBox(
+                                                                    width: 10),
+                                                                Expanded(
+                                                                  child:
+                                                                      ElevatedButton(
+                                                                    child:
+                                                                        const Text(
+                                                                      'NO',
+                                                                    ),
+                                                                    style: ElevatedButton
+                                                                        .styleFrom(
+                                                                      minimumSize:
+                                                                          const Size(
+                                                                              0,
+                                                                              45),
+                                                                      primary:
+                                                                          ColorConstants
+                                                                              .unfollow,
+                                                                      onPrimary:
+                                                                          const Color(
+                                                                              0xFFFFFFFF),
+                                                                      shape:
+                                                                          RoundedRectangleBorder(
+                                                                        borderRadius:
+                                                                            BorderRadius.circular(8),
+                                                                      ),
+                                                                    ),
+                                                                    onPressed:
+                                                                        () {
+                                                                      Get.back();
+                                                                    },
+                                                                  ),
+                                                                ),
+                                                              ],
+                                                            ),
+                                                          ],
+                                                        ),
+                                                      ),
+                                                    ),
                                                   ),
                                                 ),
-                                              ),
-                                              SizedBox(
-                                                height: 10,
-                                              ),
-                                              Align(
-                                                alignment: Alignment.centerLeft,
-                                                child: Text(
-                                                  displaypost[reverseindex]
-                                                      .personDetails!
-                                                      .userCountry!,
-                                                  style: TextStyle(
-                                                    fontSize: 12,
-                                                  ),
-                                                ),
-                                              ),
+                                              ],
+                                            ),
+                                          );
+                                        },
+                                        child: AnimatedContainer(
+                                          duration: Duration(seconds: 1),
+                                          decoration: BoxDecoration(
+                                            boxShadow: [
+                                              BoxShadow(
+                                                color: Color(0xfff5af19),
+                                                offset: Offset(5, 3),
+                                                blurRadius: 15,
+                                              )
                                             ],
+                                            gradient: LinearGradient(
+                                                colors: [
+                                                  Color(0xff833ab4),
+                                                  Color(0xfff12711),
+                                                  Color(0xfff5af19)
+                                                ],
+                                                begin: Alignment.topLeft,
+                                                end: Alignment.bottomRight),
+                                            borderRadius:
+                                                BorderRadius.circular(20),
+                                            // border: Border.all(width: 1),
+                                            color: Color.fromARGB(255, 255, 208,
+                                                68), // สีสำหรับ Dark Theme,),
                                           ),
-                                        ],
+                                          child: Padding(
+                                            padding: const EdgeInsets.only(
+                                                right: 20,
+                                                top: 10,
+                                                left: 20,
+                                                bottom: 20),
+                                            child: Column(children: [
+                                              Row(
+                                                children: [
+                                                  Padding(
+                                                    padding:
+                                                        const EdgeInsets.only(
+                                                            top: 30),
+                                                    // child: InkWell(
+                                                    //   splashColor: Colors.transparent,
+                                                    //   highlightColor: Colors.transparent,
+                                                    //   onTap: () {
+                                                    //     var userid =
+                                                    //         displaypost[reverseindex]
+                                                    //             .personDetails!
+                                                    //             .userId;
+                                                    //     bandService
+                                                    //         .profileController
+                                                    //         .anotherprofileid
+                                                    //         .value = userid!;
+                                                    //     bandService
+                                                    //         .profileController
+                                                    //         .anotherProfileType
+                                                    //         .value = "user";
+                                                    //     // print(bandService.profileController
+                                                    //     //     .anotherProfileType.value);
+                                                    //     // print(bandService.profileController
+                                                    //     //     .anotherprofileid.value);
+                                                    //     bandService.profileController
+                                                    //         .checkfollow();
+                                                    //   },
+                                                    child: CircleAvatar(
+                                                      backgroundColor:
+                                                          Colors.transparent,
+                                                      backgroundImage: NetworkImage(
+                                                          '${Config.getImage}${displaypost[reverseindex].personDetails!.userAvatar}'),
+                                                      radius: 30,
+                                                    ),
+                                                    // ),
+                                                  ),
+                                                  SizedBox(width: 20),
+                                                  Column(
+                                                    crossAxisAlignment:
+                                                        CrossAxisAlignment
+                                                            .start,
+                                                    children: [
+                                                      Row(children: [
+                                                        Container(
+                                                            width: 250,
+                                                            height: 30,
+                                                            color: Colors
+                                                                .transparent,
+                                                            child: Stack(
+                                                                children: [
+                                                                  Text(
+                                                                    displaypost[
+                                                                            reverseindex]
+                                                                        .personDetails!
+                                                                        .userName!,
+                                                                    style:
+                                                                        TextStyle(
+                                                                      color: Colors
+                                                                          .white,
+                                                                      fontSize:
+                                                                          20,
+                                                                      fontWeight:
+                                                                          FontWeight
+                                                                              .bold,
+                                                                    ),
+                                                                  ),
+                                                                  Align(
+                                                                    alignment:
+                                                                        Alignment
+                                                                            .topRight,
+                                                                    child: Lottie.asset(
+                                                                        'assets/animation_lo7mque3.json',
+                                                                        width: MediaQuery.of(context).size.width *
+                                                                            0.1,
+                                                                        height: MediaQuery.of(context).size.width *
+                                                                            0.1,
+                                                                        fit: BoxFit
+                                                                            .cover),
+                                                                  ),
+                                                                ])),
+                                                      ]),
+                                                      SizedBox(
+                                                        height: 10,
+                                                      ),
+                                                      Align(
+                                                        alignment: Alignment
+                                                            .centerLeft,
+                                                        child: Text(
+                                                          displaypost[
+                                                                  reverseindex]
+                                                              .personDetails!
+                                                              .userCountry!,
+                                                          style: TextStyle(
+                                                            color: Colors.white,
+                                                            fontSize: 12,
+                                                          ),
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ],
+                                              ),
+                                              SizedBox(
+                                                height: 50,
+                                              ),
+                                              Align(
+                                                alignment: Alignment.centerLeft,
+                                                child: Text(
+                                                  displaypost[reverseindex]
+                                                      .postMessage!,
+                                                  style: TextStyle(
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                      color: Colors.white,
+                                                      fontSize: 20),
+                                                ),
+                                              ),
+                                              SizedBox(
+                                                height: 10,
+                                              ),
+                                              Divider(
+                                                thickness: 2,
+                                              ),
+                                              Row(
+                                                children: [
+                                                  // IconButton(
+                                                  //   onPressed: () {},
+                                                  //   icon: Icon(
+                                                  //     color: Colors.white,
+                                                  //     Icons.favorite_sharp,
+                                                  //     size: 30,
+                                                  //   ),
+                                                  // ),
+                                                  SizedBox(
+                                                    width: 10,
+                                                  ),
+                                                  IconButton(
+                                                    onPressed: () {
+                                                      _commentspostscontroller
+                                                          .postid
+                                                          .value = postid!;
+                                                      print(
+                                                          "_commentspostscontroller.postid.value");
+                                                      print(
+                                                          _commentspostscontroller
+                                                              .postid.value);
+                                                      _commentspostscontroller
+                                                          .getCommentsBypostid();
+                                                      Get.to(
+                                                        PostMessage(displaypost[
+                                                                reverseindex]
+                                                            .postMessage!),
+                                                        transition: Transition
+                                                            .downToUp, // ใช้ transition ตรงนี้
+                                                      );
+                                                    },
+                                                    icon: Icon(
+                                                      Icons.comment_rounded,
+                                                      color: Colors.white,
+                                                      size: 30,
+                                                    ),
+                                                  ),
+                                                  SizedBox(width: 2),
+                                                  Text(
+                                                      '${displaypost[reverseindex].countComment}',
+                                                      style: TextStyle(
+                                                          color: Colors.white)),
+                                                  SizedBox(width: 80),
+                                                  Text(
+                                                    GetTimeAgo.parse(datetime),
+                                                    style: TextStyle(
+                                                        color: Colors.white),
+                                                  )
+                                                ],
+                                              )
+                                            ]),
+                                          ),
+                                        ),
                                       ),
-                                      SizedBox(
-                                        height: 50,
-                                      ),
-                                      Align(
-                                        alignment: Alignment.centerLeft,
-                                        child: Text(displaypost[reverseindex]
-                                            .postMessage!),
-                                      ),
-                                      SizedBox(
-                                        height: 10,
-                                      ),
-                                      Divider(
-                                        thickness: 2,
-                                      ),
-                                      Row(
-                                        children: [
-                                          IconButton(
-                                            onPressed: () {},
-                                            icon: Icon(
-                                              Icons.favorite_sharp,
-                                              size: 30,
+                                    )
+                                  : Container(
+                                      padding: EdgeInsets.symmetric(
+                                          horizontal: 16.0),
+                                      height:
+                                          MediaQuery.of(context).size.height *
+                                              0.1,
+                                      child: InkWell(
+                                        onTap: () {
+                                          _postsController
+                                              .hiddenpostAdmin.value = false;
+                                          setState(() {});
+                                          print(_postsController
+                                              .hiddenpostAdmin.value);
+                                        },
+                                        child: Card(
+                                          color: ColorConstants.gray50,
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(12.0),
+                                          ),
+                                          elevation: 4,
+                                          child: Container(
+                                            child: const Row(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.center,
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.center,
+                                              children: [
+                                                IconButton(
+                                                    onPressed: null,
+                                                    icon:
+                                                        Icon(IconlyBold.hide)),
+                                                Text(
+                                                    'You have hidden admin posts.'),
+                                              ],
                                             ),
                                           ),
-                                          SizedBox(
-                                            width: 10,
-                                          ),
-                                          IconButton(
-                                            onPressed: () {
-                                              _commentspostscontroller
-                                                  .postid.value = postid!;
-                                              print(_commentspostscontroller
-                                                  .postid.value);
-                                              _commentspostscontroller
-                                                  .getCommentsBypostid();
-                                              Get.to(
-                                                PostMessage(
-                                                    displaypost[reverseindex]
-                                                        .postMessage!),
-                                                transition: Transition
-                                                    .downToUp, // ใช้ transition ตรงนี้
-                                              );
-                                            },
-                                            icon: Icon(
-                                              Icons.comment_rounded,
-                                              size: 30,
-                                            ),
-                                          ),
-                                          SizedBox(width: 80),
-                                          Text(GetTimeAgo.parse(datetime))
-                                        ],
-                                      )
+                                        ),
+                                      ),
+                                    ),
+                            );
+                            // : Row(
+                            //     children: [
+                            //       Ink(
+                            //         child: InkWell(
+
+                            //         ),
+                            //       ),
+                            //     ],
+                            //   );
+                          } else {
+                            if (displaypost[reverseindex].postIsHide !=
+                                "true") {
+                              return Slidable(
+                                endActionPane: ActionPane(
+                                    // extentRatio: 0.3,
+                                    motion: const StretchMotion(),
+                                    children: [
+                                      if (bandService.bandsController.isBand
+                                                  .value ==
+                                              false &&
+                                          displaypost[reverseindex]
+                                                  .personDetails!
+                                                  .userId ==
+                                              bandService.profileController
+                                                  .profileid.value) ...[
+                                        SlidableAction(
+                                          flex: 3,
+                                          onPressed: ((context) {
+                                            __editpostController.clear();
+                                            Get.defaultDialog(
+                                              title: '',
+                                              content: Form(
+                                                key: _keyForm,
+                                                child: Column(
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment.center,
+                                                  children: [
+                                                    TextFormField(
+                                                      cursorColor:
+                                                          ColorConstants
+                                                              .appColors,
+                                                      validator:
+                                                          _checkeditPostValidator,
+                                                      controller:
+                                                          __editpostController,
+                                                      keyboardType:
+                                                          TextInputType.text,
+                                                      maxLines: 1,
+                                                      decoration:
+                                                          const InputDecoration(
+                                                        labelText: 'Message',
+                                                        hintMaxLines: 1,
+                                                        border:
+                                                            OutlineInputBorder(
+                                                          borderSide:
+                                                              BorderSide(
+                                                                  color: Colors
+                                                                      .green,
+                                                                  width: 4.0),
+                                                        ),
+                                                      ),
+                                                    ),
+                                                    SizedBox(
+                                                      height: 30.0,
+                                                    ),
+                                                    ElevatedButton(
+                                                      onPressed: () async {
+                                                        if (_keyForm
+                                                            .currentState!
+                                                            .validate()) {
+                                                          await doEditPost(
+                                                              context, postid!);
+                                                          Get.back();
+                                                        }
+                                                      },
+                                                      style: ButtonStyle(
+                                                        padding:
+                                                            MaterialStateProperty
+                                                                .all<
+                                                                    EdgeInsets>(
+                                                          const EdgeInsets
+                                                                  .symmetric(
+                                                              horizontal: 20.0),
+                                                        ),
+                                                        backgroundColor:
+                                                            MaterialStateProperty
+                                                                .all<Color>(
+                                                          Color.fromARGB(255,
+                                                              35, 236, 193),
+                                                        ),
+                                                      ),
+                                                      child: const Text(
+                                                        'EDIT SAVE',
+                                                        style: TextStyle(
+                                                          color: Colors.white,
+                                                          fontSize: 16.0,
+                                                        ),
+                                                      ),
+                                                    )
+                                                  ],
+                                                ),
+                                              ),
+                                              radius: 10.0,
+                                            );
+                                          }),
+                                          backgroundColor: Colors.amber,
+                                          icon: IconlyBold.edit,
+                                          foregroundColor: Colors.white,
+                                        )
+                                      ],
+                                      if (bandService.bandsController.isBand
+                                                  .value ==
+                                              false &&
+                                          displaypost[reverseindex]
+                                                  .personDetails!
+                                                  .userId ==
+                                              bandService.profileController
+                                                  .profileid.value) ...[
+                                        SlidableAction(
+                                          flex: 3,
+                                          onPressed: ((context) async {
+                                            await doDeletePost(
+                                                context, postid!);
+                                          }),
+                                          backgroundColor: Colors.red,
+                                          icon: IconlyBold.delete,
+                                          foregroundColor: Colors.white,
+                                        )
+                                      ],
+                                      if (bandService.profileController.isAdmin
+                                                  .value !=
+                                              "true" &&
+                                          displaypost[reverseindex]
+                                                  .personDetails!
+                                                  .userId !=
+                                              bandService.profileController
+                                                  .profileid.value) ...[
+                                        SlidableAction(
+                                          flex: 4,
+                                          onPressed: ((context) async {
+                                            _reportsController.postid.value =
+                                                postid!;
+                                            await docreateReport(context);
+                                          }),
+                                          backgroundColor:
+                                              ColorConstants.unfollow,
+                                          icon: Icons.report_rounded,
+                                          foregroundColor: Colors.white,
+                                        )
+                                      ]
                                     ]),
+                                child: Card(
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(20.0),
+                                  ),
+                                  elevation: 8,
+                                  margin: const EdgeInsets.all(15),
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(20),
+                                      border: Border.all(
+                                          color: ColorConstants.appColors,
+                                          width: 0.7),
+                                    ),
+                                    child: Padding(
+                                      padding: const EdgeInsets.only(
+                                          right: 20,
+                                          top: 10,
+                                          left: 20,
+                                          bottom: 20),
+                                      child: Column(children: [
+                                        Row(
+                                          children: [
+                                            Padding(
+                                              padding: const EdgeInsets.only(
+                                                  top: 30),
+                                              child: InkWell(
+                                                splashColor: Colors.transparent,
+                                                highlightColor:
+                                                    Colors.transparent,
+                                                onTap: () async {
+                                                  var userid =
+                                                      displaypost[reverseindex]
+                                                          .personDetails!
+                                                          .userId;
+                                                  bandService
+                                                      .profileController
+                                                      .anotherprofileid
+                                                      .value = userid!;
+                                                  bandService
+                                                      .profileController
+                                                      .anotherProfileType
+                                                      .value = "user";
+                                                  print(bandService
+                                                      .profileController
+                                                      .anotherProfileType
+                                                      .value);
+                                                  print(bandService
+                                                      .profileController
+                                                      .anotherprofileid
+                                                      .value);
+                                                  try {
+                                                    await bandService
+                                                        .profileController
+                                                        .checkfollow();
+                                                    await bandService
+                                                        .notificationController
+                                                        .checkInviteBand();
+                                                    await bandService
+                                                        .notificationController
+                                                        .checkSendEmail();
+                                                  } catch (e) {
+                                                    print("Error: $e");
+                                                    // Handle the error as needed
+                                                  }
+                                                  Get.to(
+                                                      transition:
+                                                          Transition.downToUp,
+                                                      AnotherProfileTab(
+                                                        anotherpofileid: userid,
+                                                      ));
+                                                },
+                                                child: CircleAvatar(
+                                                  backgroundColor:
+                                                      Colors.transparent,
+                                                  backgroundImage: NetworkImage(
+                                                      '${Config.getImage}${displaypost[reverseindex].personDetails!.userAvatar}'),
+                                                  radius: 30,
+                                                ),
+                                              ),
+                                            ),
+                                            SizedBox(width: 20),
+                                            Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                Container(
+                                                    width: 250,
+                                                    height: 30,
+                                                    color: Colors.transparent,
+                                                    child: Stack(children: [
+                                                      Text(
+                                                        displaypost[
+                                                                reverseindex]
+                                                            .personDetails!
+                                                            .userName!,
+                                                        style: TextStyle(
+                                                          fontSize: 20,
+                                                          fontWeight:
+                                                              FontWeight.bold,
+                                                        ),
+                                                      ),
+                                                      //   Positioned(
+                                                      //     right: 20,
+                                                      //     child: Container(
+                                                      //         child: userPositionIcon),
+                                                      //   )
+                                                    ])),
+                                                SizedBox(
+                                                  height: 10,
+                                                ),
+                                                Align(
+                                                  alignment:
+                                                      Alignment.centerLeft,
+                                                  child: Text(
+                                                    displaypost[reverseindex]
+                                                        .personDetails!
+                                                        .userPosition!,
+                                                    style: TextStyle(
+                                                      fontSize: 14,
+                                                    ),
+                                                  ),
+                                                ),
+                                                SizedBox(
+                                                  height: 10,
+                                                ),
+                                                Align(
+                                                  alignment:
+                                                      Alignment.centerLeft,
+                                                  child: Text(
+                                                    displaypost[reverseindex]
+                                                        .personDetails!
+                                                        .userCountry!,
+                                                    style: TextStyle(
+                                                      fontSize: 12,
+                                                    ),
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ],
+                                        ),
+                                        SizedBox(
+                                          height: 50,
+                                        ),
+                                        Align(
+                                          alignment: Alignment.centerLeft,
+                                          child: Text(displaypost[reverseindex]
+                                              .postMessage!),
+                                        ),
+                                        SizedBox(
+                                          height: 10,
+                                        ),
+                                        Divider(
+                                          thickness: 2,
+                                        ),
+                                        Row(
+                                          children: [
+                                            // IconButton(
+                                            //   onPressed: () {},
+                                            //   icon: Icon(
+                                            //     Icons.favorite_sharp,
+                                            //     size: 30,
+                                            //   ),
+                                            // ),
+                                            SizedBox(
+                                              width: 10,
+                                            ),
+                                            IconButton(
+                                              onPressed: () {
+                                                _commentspostscontroller
+                                                    .postid.value = postid!;
+                                                print(_commentspostscontroller
+                                                    .postid.value);
+                                                _commentspostscontroller
+                                                    .getCommentsBypostid();
+                                                Get.to(
+                                                  PostMessage(
+                                                      displaypost[reverseindex]
+                                                          .postMessage!),
+                                                  transition: Transition
+                                                      .downToUp, // ใช้ transition ตรงนี้
+                                                );
+                                              },
+                                              icon: Icon(
+                                                Icons.comment_rounded,
+                                                size: 30,
+                                              ),
+                                            ),
+                                            SizedBox(width: 2),
+                                            Text(
+                                                '${displaypost[reverseindex].countComment}'),
+                                            SizedBox(width: 80),
+                                            Text(GetTimeAgo.parse(datetime))
+                                          ],
+                                        )
+                                      ]),
+                                    ),
                                   ),
                                 ),
-                              ),
-                            );
+                              );
+                            }
                           }
                         },
                         childCount: displaypost.length,
@@ -1379,6 +1851,42 @@ class _TestsPostTabState extends State<TestsPostTab> {
       showCustomSnackBar(
           'deletePost Failed',
           "Invalid token",
+          Colors.red, // สีแดงหรือสีที่คุณต้องการ
+          ContentType.failure);
+      // การส่งข้อมูลไม่สำเร็จ
+    }
+  }
+
+  Future docreateReport(
+    BuildContext context,
+  ) async {
+    var rs = await _reportsController.createReport();
+    print(rs.body);
+    var jsonRes = jsonDecode(rs.body);
+    if (rs.statusCode == 200) {
+      if (jsonRes['success'] == 1) {
+        showCustomSnackBar('Congratulations', 'Thanks for Report',
+            ColorConstants.appColors, ContentType.success);
+      }
+      // }
+    } else if (rs.statusCode == 500) {
+      showCustomSnackBar(
+          'Report Failed',
+          'Database connection error',
+          Colors.red, // สีแดงหรือสีที่คุณต้องการ
+          ContentType.failure);
+    } else if (rs.statusCode == 498) {
+      _mainWrapperController.logOut();
+      showCustomSnackBar(
+          'Report Failed',
+          "Invalid token",
+          Colors.red, // สีแดงหรือสีที่คุณต้องการ
+          ContentType.failure);
+      // การส่งข้อมูลไม่สำเร็จ
+    } else if (rs.statusCode == 403) {
+      showCustomSnackBar(
+          'Report Failed',
+          "You have already reported this post.",
           Colors.red, // สีแดงหรือสีที่คุณต้องการ
           ContentType.failure);
       // การส่งข้อมูลไม่สำเร็จ

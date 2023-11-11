@@ -52,6 +52,8 @@ class _VideoTabState extends State<VideoTab> {
     super.initState();
     _videosController.getVideos();
     bandService.notificationController.getNotifications();
+    print("bandService.profileController.anotherProfileType.value");
+    print(bandService.profileController.anotherProfileType.value);
     // _commentsvideoscontroller.getCommentsByvideoid();
     // _isMounted = true; // Set the flag to true when the widget is mounted
   }

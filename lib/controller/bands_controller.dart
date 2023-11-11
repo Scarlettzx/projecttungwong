@@ -119,6 +119,7 @@ class BandsController extends GetxController {
 
 // // ! checkBand is have or not have
   Future<void> checkBand() async {
+    isLoading.value = true;
     await bandService.profileController.getProfile();
     print("profileController.profileList");
     print(bandService.profileController.profileList);
@@ -133,10 +134,12 @@ class BandsController extends GetxController {
       createBand.value = true;
       // await getBand();
       print(createBand.value);
+      isLoading.value = false;
     } else {
       bandid.value = 0;
       isBand.value = false;
       createBand.value = false;
+      isLoading.value = false;
       print(createBand.value);
     }
   }
@@ -376,6 +379,8 @@ class BandsController extends GetxController {
       }
     } catch (e) {
       print(e.toString());
+    } finally {
+      isLoading.value = false;
     }
   }
 

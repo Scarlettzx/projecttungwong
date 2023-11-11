@@ -1,6 +1,7 @@
 import 'package:project/controller/bands_controller.dart';
 import 'package:project/controller/profile_controller.dart';
 import 'package:project/view/band_tab.dart';
+import 'package:project/view/report_tab.dart';
 import 'package:project/view/search_tab.dart';
 import 'package:project/view/profile_tab.dart';
 import 'package:flutter/material.dart';
@@ -9,10 +10,12 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../core/authentication_manager.dart';
 import '../pages/login_screen.dart';
+import '../services/bandservice.dart';
 import '../view/home_tab.dart';
 
 class MainWrapperController extends GetxController {
   late PageController pageController;
+  // final BandService bandService = Get.find<BandService>();
   // late TabController tabController;
   // final AuthenticationManager _authManager = Get.find();
 
@@ -27,6 +30,7 @@ class MainWrapperController extends GetxController {
   List<Widget> pages = [
     const HomeTab(),
     const BandTab(),
+    const ReportTab(),
     const SearchTab(),
     const ProfileTab(),
   ];
@@ -93,6 +97,7 @@ class MainWrapperController extends GetxController {
   //! เมื่อเริ่มต้น MainWrapperController จะทำงาน
   void onInit() {
     pageController = PageController(initialPage: 0);
+    // Get.put(BandService()).init();
     // profileController.getProfileFromToken();
     super.onInit();
     // bandsController.checkBand();

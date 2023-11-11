@@ -22,8 +22,24 @@ class ApiProvider {
     // return http.post(url, body: body);
   }
 
-  Future<http.Response> doRegister(String username, String province,
-      String role, String email, String password, String filepath) async {
+  Future<http.Response> doCreateOtp(String email) async {
+    final Uri url = Uri.parse('${Config.endPoint}/api/otp/create');
+    // String url = '$endPoint/api/users/login';
+    var body = {
+      "email": email,
+    };
+    return await http.post(url, body: body);
+    // return http.post(url, body: body);
+  }
+
+  Future<http.Response> doRegister(
+      String username,
+      String province,
+      String role,
+      String email,
+      String password,
+      String filepath,
+      String otp) async {
     print(filepath);
     final Uri url = Uri.parse('${Config.endPoint}/api/users/register');
     var request = http.MultipartRequest('POST', url);
@@ -32,6 +48,7 @@ class ApiProvider {
     request.fields['password'] = password;
     request.fields['country'] = province;
     request.fields['position'] = role;
+    request.fields['verificationCode'] = otp;
     // ระบุชื่อฟิลด์และส่งรูปภาพจาก filepath
     request.files.add(http.MultipartFile(
       'avatar',
@@ -85,6 +102,7 @@ class ApiProvider {
       throw Exception('Error fetching data from');
     }
   }
+
   Future<List<ProvinceDropdownModel>> fetchProvinceDatad() async {
     try {
       final response = await http.get(Uri.parse(Config.provinceAPI));

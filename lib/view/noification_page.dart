@@ -39,6 +39,7 @@ class _NotificationPageState extends State<NotificationPage> {
   final BandService bandService = Get.find();
   @override
   Widget build(BuildContext context) {
+    bandService.profileController.isvideo.value = false;
     return ModalProgressHUD(
       inAsyncCall: _saving,
       progressIndicator: LoadingAnimationWidget.bouncingBall(
@@ -139,7 +140,7 @@ class _NotificationPageState extends State<NotificationPage> {
                                         ),
                                         child: ListTile(
                                           leading: InkWell(
-                                            onTap: () {
+                                            onTap: () async {
                                               if (isBand) {
                                                 var bandid = notidata
                                                     .bandDetails!.bandId;
@@ -160,8 +161,17 @@ class _NotificationPageState extends State<NotificationPage> {
                                                     .profileController
                                                     .anotherprofileid
                                                     .value);
-                                                bandService.profileController
-                                                    .checkfollow();
+                                                try {
+                                                  await bandService
+                                                      .profileController
+                                                      .checkfollow();
+                                                  await bandService
+                                                      .notificationController
+                                                      .checkSendEmail();
+                                                } catch (e) {
+                                                  print("Error: $e");
+                                                  // Handle the error as needed
+                                                }
                                                 Get.to(
                                                     transition:
                                                         Transition.downToUp,
@@ -187,8 +197,20 @@ class _NotificationPageState extends State<NotificationPage> {
                                                     .profileController
                                                     .anotherprofileid
                                                     .value);
-                                                bandService.profileController
-                                                    .checkfollow();
+                                                try {
+                                                  await bandService
+                                                      .profileController
+                                                      .checkfollow();
+                                                  await bandService
+                                                      .notificationController
+                                                      .checkInviteBand();
+                                                  await bandService
+                                                      .notificationController
+                                                      .checkSendEmail();
+                                                } catch (e) {
+                                                  print("Error: $e");
+                                                  // Handle the error as needed
+                                                }
                                                 Get.to(
                                                     transition:
                                                         Transition.downToUp,
@@ -247,7 +269,7 @@ class _NotificationPageState extends State<NotificationPage> {
                                                                             FontWeight.bold),
                                                                   ),
                                                           ],
-                                                            if (notidata
+                                                          if (notidata
                                                                   .notiType ==
                                                               "1") ...[
                                                             (isBand)
@@ -276,7 +298,75 @@ class _NotificationPageState extends State<NotificationPage> {
                                                 height: MediaQuery.of(context)
                                                         .size
                                                         .height *
-                                                    0.05,
+                                                    0.01,
+                                              ),
+                                              Padding(
+                                                padding:
+                                                    const EdgeInsets.all(8.0),
+                                                child: Row(
+                                                  children: [
+                                                    Container(
+                                                      color: Colors.transparent,
+                                                      width:
+                                                          MediaQuery.of(context)
+                                                                  .size
+                                                                  .width /
+                                                              2,
+                                                      child: Wrap(
+                                                        children: [
+                                                          if (notidata
+                                                                  .notiType ==
+                                                              "1") ...[
+                                                            (isBand)
+                                                                ? Text(
+                                                                    'ข้อความ: ${notidata.notiMessage}',
+                                                                    style: TextStyle(
+                                                                        fontSize:
+                                                                            15,
+                                                                        fontWeight:
+                                                                            FontWeight.bold),
+                                                                  )
+                                                                : Text(
+                                                                    'ข้อความ: ${notidata.notiMessage}',
+                                                                    style: TextStyle(
+                                                                        fontSize:
+                                                                            15,
+                                                                        fontWeight:
+                                                                            FontWeight.bold),
+                                                                  ),
+                                                          ],
+                                                          if (notidata
+                                                                  .notiType ==
+                                                              "2") ...[
+                                                            (isBand)
+                                                                ? Text(
+                                                                    'ข้อความ: ${notidata.notiMessage}',
+                                                                    style: TextStyle(
+                                                                        fontSize:
+                                                                            15,
+                                                                        fontWeight:
+                                                                            FontWeight.bold),
+                                                                  )
+                                                                : Text(
+                                                                    'ข้อความ: ${notidata.notiMessage}',
+                                                                    style: TextStyle(
+                                                                        fontSize:
+                                                                            15,
+                                                                        fontWeight:
+                                                                            FontWeight.bold),
+                                                                  ),
+                                                          ]
+                                                        ],
+                                                      ),
+                                                    )
+                                                  ],
+                                                ),
+                                              ),
+                                              SizedBox(
+                                                height: MediaQuery.of(context)
+                                                        .size
+                                                        .height *
+                                                    0.01,
                                               ),
                                               Row(
                                                 children: [
@@ -390,7 +480,6 @@ class _NotificationPageState extends State<NotificationPage> {
                                                     SizedBox(
                                                       width: 5,
                                                     ),
-                                                    
                                                   ]
                                                 ],
                                               )

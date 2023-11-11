@@ -251,21 +251,6 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                     ),
                   ),
-                  const SizedBox(height: 10),
-                  // ! Forgot Password?
-                  const Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 25.0),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        Text(
-                          'Forgot Password?',
-                          style: TextStyle(
-                              color: Color.fromARGB(255, 173, 173, 173)),
-                        ),
-                      ],
-                    ),
-                  ),
                   // !Button Sign in (onPress to be used function future doLogin for passing to nodejs in Database to check Token)
                   const SizedBox(
                     height: 20,

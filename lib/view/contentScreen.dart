@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:awesome_snackbar_content/awesome_snackbar_content.dart';
 import 'package:chewie/chewie.dart';
 import 'package:flutter/material.dart';
@@ -36,16 +38,22 @@ class _ContentScreenState extends State<ContentScreen> {
   final CommentsVideosController _commentsvideoscontroller =
       Get.put(CommentsVideosController());
   final GlobalKey<FormState> _keyForm = GlobalKey<FormState>();
-  // final VideosController _videosController = Get.find<VideosController>();
+  final VideosController _videosController = Get.find<VideosController>();
   late VideoPlayerController videoPlayerController;
   ChewieController? chewieController;
   TextEditingController _textcommentController = TextEditingController();
+  TextEditingController _editvideoController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
     initializePlayer();
+    _editvideoController = TextEditingController();
+    _textcommentController = TextEditingController();
     // _textcommentController = TextEditingController();
+    print(bandService.profileController.isvideo.value);
+    bandService.profileController.isvideo.value = true;
+    print(bandService.profileController.isvideo.value);
   }
 
   @override
@@ -54,6 +62,7 @@ class _ContentScreenState extends State<ContentScreen> {
     videoPlayerController.pause();
     chewieController?.dispose();
     _textcommentController.dispose();
+    _editvideoController.dispose();
     super.dispose();
   }
 
@@ -101,6 +110,164 @@ class _ContentScreenState extends State<ContentScreen> {
     // print(MediaQuery.of(context).size.width);
     // print(MediaQuery.of(context).size.height);
     chewieController = ChewieController(
+      additionalOptions: (context) {
+        return <OptionItem>[
+          if (widget.video.bandDetails != null &&
+              bandService.bandsController.isBand.value == true &&
+              bandService.bandsController.bandid.value ==
+                  widget.video.bandDetails?.bandId)
+            OptionItem(
+                iconData: IconlyBold.edit,
+                title: 'Edit Video',
+                onTap: () {
+                  _editvideoController.clear();
+                  Get.defaultDialog(
+                    title: '',
+                    content: Form(
+                      key: _keyForm,
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          TextFormField(
+                            cursorColor: ColorConstants.appColors,
+                            // validator:
+                            //     _checkeditPostValidator,
+                            controller: _editvideoController,
+                            keyboardType: TextInputType.text,
+                            maxLines: 1,
+                            decoration: const InputDecoration(
+                              labelText: 'Message',
+                              hintMaxLines: 1,
+                              border: OutlineInputBorder(
+                                borderSide:
+                                    BorderSide(color: Colors.green, width: 4.0),
+                              ),
+                            ),
+                          ),
+                          SizedBox(
+                            height: 30.0,
+                          ),
+                          ElevatedButton(
+                            onPressed: () async {
+                              if (_keyForm.currentState!.validate()) {
+                                await doEditVideo(
+                                    context, widget.video.videoId!);
+                                Get.back();
+                              }
+                            },
+                            style: ButtonStyle(
+                              padding: MaterialStateProperty.all<EdgeInsets>(
+                                const EdgeInsets.symmetric(horizontal: 20.0),
+                              ),
+                              backgroundColor: MaterialStateProperty.all<Color>(
+                                Color.fromARGB(255, 35, 236, 193),
+                              ),
+                            ),
+                            child: const Text(
+                              'EDIT SAVE',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 16.0,
+                              ),
+                            ),
+                          )
+                        ],
+                      ),
+                    ),
+                    radius: 10.0,
+                  );
+                }),
+          if (widget.video.personDetails != null &&
+              bandService.bandsController.isBand.value == false &&
+              bandService.profileController.profileid.value ==
+                  widget.video.personDetails?.userId)
+            OptionItem(
+                iconData: IconlyBold.edit,
+                title: 'Edit Video',
+                onTap: () {
+                  _editvideoController.clear();
+                  Get.defaultDialog(
+                    title: '',
+                    content: Form(
+                      key: _keyForm,
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          TextFormField(
+                            cursorColor: ColorConstants.appColors,
+                            // validator:
+                            //     _checkeditPostValidator,
+                            controller: _editvideoController,
+                            keyboardType: TextInputType.text,
+                            maxLines: 1,
+                            decoration: const InputDecoration(
+                              labelText: 'Message',
+                              hintMaxLines: 1,
+                              border: OutlineInputBorder(
+                                borderSide:
+                                    BorderSide(color: Colors.green, width: 4.0),
+                              ),
+                            ),
+                          ),
+                          SizedBox(
+                            height: 30.0,
+                          ),
+                          ElevatedButton(
+                            onPressed: () async {
+                              // if (_keyForm.currentState!.validate()) {
+                              await doEditVideo(context, widget.video.videoId!);
+                              Get.back();
+                              // }
+                            },
+                            style: ButtonStyle(
+                              padding: MaterialStateProperty.all<EdgeInsets>(
+                                const EdgeInsets.symmetric(horizontal: 20.0),
+                              ),
+                              backgroundColor: MaterialStateProperty.all<Color>(
+                                Color.fromARGB(255, 35, 236, 193),
+                              ),
+                            ),
+                            child: const Text(
+                              'EDIT SAVE',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 16.0,
+                              ),
+                            ),
+                          )
+                        ],
+                      ),
+                    ),
+                    radius: 10.0,
+                  );
+                }),
+          if (widget.video.bandDetails != null &&
+              bandService.bandsController.isBand.value == true &&
+              bandService.bandsController.bandid.value ==
+                  widget.video.bandDetails?.bandId)
+            OptionItem(
+              onTap: () async =>
+                  await doDeleteVideo(context, widget.video.videoId!),
+              iconData: IconlyBold.delete,
+              title: 'Delete Video',
+            ),
+          if (widget.video.personDetails != null &&
+              bandService.bandsController.isBand.value == false &&
+              bandService.profileController.profileid.value ==
+                  widget.video.personDetails?.userId)
+            OptionItem(
+              onTap: () async =>
+                  await doDeleteVideo(context, widget.video.videoId!),
+              iconData: IconlyBold.delete,
+              title: 'Delete Video',
+            ),
+          // OptionItem(
+          //   onTap: () => debugPrint('Another option that works!'),
+          //   iconData: Icons.report_rounded,
+          //   title: 'Report Video ',
+          // ),
+        ];
+      },
       videoPlayerController: videoPlayerController,
       autoPlay: true,
       showControls: true,
@@ -184,7 +351,7 @@ class _ContentScreenState extends State<ContentScreen> {
                                       backgroundColor: Colors.transparent,
                                       backgroundImage: NetworkImage(
                                           '${Config.getImageBand}${widget.video.bandDetails!.bandAvatar}'),
-                                      radius: 15,
+                                      radius: 20,
                                     ),
                                   ),
                                 )
@@ -225,26 +392,41 @@ class _ContentScreenState extends State<ContentScreen> {
                                       backgroundColor: Colors.transparent,
                                       backgroundImage: NetworkImage(
                                           '${Config.getImage}${widget.video.personDetails!.userAvatar}'),
-                                      radius: 15,
+                                      radius: 20,
                                     ),
                                   ),
                                 ),
                           SizedBox(width: 6),
-                          (widget.video.bandDetails != null)
-                              ? Text(
-                                  widget.video.bandDetails!
-                                      .bandName!, //username ของ user
-                                  style: TextStyle(color: Colors.white))
-                              : Text(
-                                  widget.video.personDetails!
-                                      .userName!, //username ของ user
-                                  style: TextStyle(color: Colors.white)),
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(
+                                50), // รูปร่างขอบของ ClipRRect
+                            child: Container(
+                              color: ColorConstants.appColors, // สีพื้นหลังสีดำ
+                              child: Padding(
+                                padding: EdgeInsets.all(
+                                    8), // ตั้งระยะขอบของ Container
+                                child: Text(
+                                  widget.video.bandDetails?.bandName ??
+                                      widget.video.personDetails?.userName ??
+                                      '',
+                                  style: TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 15),
+                                ),
+                              ),
+                            ),
+                          )
                         ],
                       ),
                       SizedBox(width: 6),
-                      Text(widget.video.videoMessage!, // describtion ของ video
-                          style: TextStyle(color: Colors.white)),
-                      SizedBox(height: 10),
+                      Container(
+                        height: MediaQuery.sizeOf(context).height * 0.05,
+                        child: Text(
+                            widget.video.videoMessage!, // describtion ของ video
+                            style: TextStyle(color: Colors.white)),
+                      ),
+                      // SizedBox(height: 10),
                     ],
                   ),
                   Column(
@@ -253,11 +435,7 @@ class _ContentScreenState extends State<ContentScreen> {
                           padding: const EdgeInsets.only(
                         right: 50,
                         // top: 50,
-                      )),
-                      LikeButton(
-                        size: 40,
-                      ),
-                      Text('601k'), // total like
+                      )), // total like
                       SizedBox(height: 20),
                       IconButton(
                         onPressed: () {
@@ -382,9 +560,11 @@ class _ContentScreenState extends State<ContentScreen> {
                                                                       .comments[
                                                                           reverseindex]
                                                                       .commentMessage!,
-                                                                  style: const TextStyle(
-                                                                      fontSize:
-                                                                          17),
+                                                                  style: TextStyle(
+                                                                      color: Theme.of(context).brightness == Brightness.light
+                                                                          ? Colors.black // สีสำหรับ Light Theme
+                                                                          : ColorConstants.appColors,
+                                                                      fontSize: 17),
                                                                 ),
                                                               ),
                                                               // isThreeLine: true,
@@ -404,13 +584,63 @@ class _ContentScreenState extends State<ContentScreen> {
                                                                       height:
                                                                           70, // ปรับขนาดของ Container ตามต้องการ
                                                                       child:
-                                                                          CircleAvatar(
-                                                                        // radius: 10,
-                                                                        backgroundColor:
+                                                                          InkWell(
+                                                                        splashColor:
                                                                             Colors.transparent,
-                                                                        backgroundImage: _commentsvideoscontroller.comments[reverseindex].bandDetails!.bandAvatar!.isEmpty
-                                                                            ? null
-                                                                            : NetworkImage('${Config.getImageBand}${_commentsvideoscontroller.comments[reverseindex].bandDetails!.bandAvatar}'),
+                                                                        highlightColor:
+                                                                            Colors.transparent,
+                                                                        onTap:
+                                                                            () async {
+                                                                          var bandid = _commentsvideoscontroller
+                                                                              .comments[reverseindex]
+                                                                              .bandDetails!
+                                                                              .bandId;
+                                                                          // ! เอาค่าbandidเก็บใน anotherprofileid เพื่อจะเข้า method
+                                                                          bandService
+                                                                              .profileController
+                                                                              .anotherprofileid
+                                                                              .value = bandid!;
+                                                                          bandService
+                                                                              .profileController
+                                                                              .anotherProfileType
+                                                                              .value = "band";
+                                                                          // bandService
+                                                                          //     .bandsController
+                                                                          //     .anotherbandid
+                                                                          //     .value = bandid;
+                                                                          print(bandService
+                                                                              .profileController
+                                                                              .anotherProfileType
+                                                                              .value);
+                                                                          print(bandService
+                                                                              .profileController
+                                                                              .anotherprofileid
+                                                                              .value);
+                                                                          try {
+                                                                            await bandService.profileController.checkfollow();
+                                                                            await bandService.notificationController.checkSendEmail();
+                                                                          } catch (e) {
+                                                                            print("Error: $e");
+                                                                            // Handle the error as needed
+                                                                          }
+
+                                                                          // bandService.notificationController
+                                                                          //     .checkInviteBand();
+                                                                          Get.to(
+                                                                              transition: Transition.downToUp,
+                                                                              AnotherProfileTab(
+                                                                                anotherpofileid: bandid,
+                                                                              ));
+                                                                        },
+                                                                        child:
+                                                                            CircleAvatar(
+                                                                          // radius: 10,
+                                                                          backgroundColor:
+                                                                              Colors.transparent,
+                                                                          backgroundImage: _commentsvideoscontroller.comments[reverseindex].bandDetails!.bandAvatar!.isEmpty
+                                                                              ? null
+                                                                              : NetworkImage('${Config.getImageBand}${_commentsvideoscontroller.comments[reverseindex].bandDetails!.bandAvatar}'),
+                                                                        ),
                                                                       ),
                                                                     ),
                                                                   ),
@@ -423,6 +653,10 @@ class _ContentScreenState extends State<ContentScreen> {
                                                               ),
 
                                                               trailing: Text(
+                                                                style: TextStyle(
+                                                                    color: Theme.of(context).brightness == Brightness.light
+                                                                        ? Colors.black // สีสำหรับ Light Theme
+                                                                        : ColorConstants.appColors),
                                                                 GetTimeAgo.parse(
                                                                     datetime),
                                                               ),
@@ -445,9 +679,11 @@ class _ContentScreenState extends State<ContentScreen> {
                                                                       .comments[
                                                                           reverseindex]
                                                                       .commentMessage!,
-                                                                  style: const TextStyle(
-                                                                      fontSize:
-                                                                          17),
+                                                                  style: TextStyle(
+                                                                      color: Theme.of(context).brightness == Brightness.light
+                                                                          ? Colors.black // สีสำหรับ Light Theme
+                                                                          : ColorConstants.appColors,
+                                                                      fontSize: 17),
                                                                 ),
                                                               ),
                                                               // isThreeLine: true,
@@ -467,13 +703,47 @@ class _ContentScreenState extends State<ContentScreen> {
                                                                       height:
                                                                           70, // ปรับขนาดของ Container ตามต้องการ
                                                                       child:
-                                                                          CircleAvatar(
-                                                                        // radius: 10,
-                                                                        backgroundColor:
-                                                                            Colors.transparent,
-                                                                        backgroundImage: _commentsvideoscontroller.comments[reverseindex].personDetails!.userAvatar!.isEmpty
-                                                                            ? null
-                                                                            : NetworkImage('${Config.getImage}${_commentsvideoscontroller.comments[reverseindex].personDetails!.userAvatar}'),
+                                                                          InkWell(
+                                                                        onTap:
+                                                                            () async {
+                                                                          if (_commentsvideoscontroller.comments[reverseindex].personDetails!.userIsAdmin !=
+                                                                              true.toString()) {
+                                                                            var userid =
+                                                                                _commentsvideoscontroller.comments[reverseindex].personDetails!.userId;
+
+                                                                            bandService.profileController.anotherprofileid.value =
+                                                                                userid!;
+                                                                            bandService.profileController.anotherProfileType.value =
+                                                                                "user";
+                                                                            print(bandService.profileController.anotherProfileType.value);
+                                                                            print(bandService.profileController.anotherprofileid.value);
+                                                                            try {
+                                                                              await bandService.profileController.checkfollow();
+                                                                              await bandService.notificationController.checkInviteBand();
+                                                                              await bandService.notificationController.checkSendEmail();
+                                                                            } catch (e) {
+                                                                              print("Error: $e");
+                                                                              // Handle the error as needed
+                                                                            }
+
+                                                                            Get.to(
+                                                                                transition: Transition.downToUp,
+                                                                                AnotherProfileTab(
+                                                                                  anotherpofileid: userid,
+                                                                                ));
+                                                                          } else {
+                                                                            null;
+                                                                          }
+                                                                        },
+                                                                        child:
+                                                                            CircleAvatar(
+                                                                          // radius: 10,
+                                                                          backgroundColor:
+                                                                              Colors.transparent,
+                                                                          backgroundImage: _commentsvideoscontroller.comments[reverseindex].personDetails!.userAvatar!.isEmpty
+                                                                              ? null
+                                                                              : NetworkImage('${Config.getImage}${_commentsvideoscontroller.comments[reverseindex].personDetails!.userAvatar}'),
+                                                                        ),
                                                                       ),
                                                                     ),
                                                                   ),
@@ -486,6 +756,10 @@ class _ContentScreenState extends State<ContentScreen> {
                                                               ),
 
                                                               trailing: Text(
+                                                                style: TextStyle(
+                                                                    color: Theme.of(context).brightness == Brightness.light
+                                                                        ? Colors.black // สีสำหรับ Light Theme
+                                                                        : ColorConstants.appColors),
                                                                 GetTimeAgo.parse(
                                                                     datetime),
                                                               ),
@@ -508,6 +782,14 @@ class _ContentScreenState extends State<ContentScreen> {
                                                   padding:
                                                       const EdgeInsets.all(8.0),
                                                   child: TextFormField(
+                                                    style: TextStyle(
+                                                        color: Theme.of(context)
+                                                                    .brightness ==
+                                                                Brightness.light
+                                                            ? Colors
+                                                                .black // สีสำหรับ Light Theme
+                                                            : ColorConstants
+                                                                .appColors),
                                                     validator:
                                                         _commentValidator,
                                                     controller:
@@ -602,7 +884,9 @@ class _ContentScreenState extends State<ContentScreen> {
                         ),
                       ),
 
-                      Text('1123'), //total commend
+                      Text('${widget.video.countComment}',
+                          style:
+                              TextStyle(color: Colors.white)), //total commend
                       SizedBox(height: 20),
                       // Transform(
                       //   transform: Matrix4.rotationZ(5.8),
@@ -655,6 +939,75 @@ class _ContentScreenState extends State<ContentScreen> {
         // เกิดข้อผิดพลาดในการเชื่อมต่อ
         print('Error creating post: $e');
       }
+    }
+  }
+
+  Future doEditVideo(
+    BuildContext context,
+    int videoid,
+  ) async {
+    var rs = await _videosController.editVideo(
+        videoid, _editvideoController.text.trim());
+    print(rs.body);
+    var jsonRes = jsonDecode(rs.body);
+    if (rs.statusCode == 200) {
+      if (jsonRes['success'] == 1) {
+        showCustomSnackBar('Congratulations', 'EditVideo Successfully',
+            ColorConstants.appColors, ContentType.success);
+      }
+      await _videosController.getVideos();
+      Get.back();
+      // displaypost = _postsController.displaypost;
+      // }
+    } else if (rs.statusCode == 500) {
+      showCustomSnackBar(
+          'EditVideo Failed',
+          'Database connection error',
+          Colors.red, // สีแดงหรือสีที่คุณต้องการ
+          ContentType.failure);
+    } else if (rs.statusCode == 498) {
+      _mainWrapperController.logOut();
+      showCustomSnackBar(
+          'EditVideo Failed',
+          "Invalid token",
+          Colors.red, // สีแดงหรือสีที่คุณต้องการ
+          ContentType.failure);
+      // การส่งข้อมูลไม่สำเร็จ
+    }
+  }
+
+  Future doDeleteVideo(
+    BuildContext context,
+    int videoid,
+  ) async {
+    var rs = await _videosController.deleteVideo(videoid);
+    print(rs.body);
+    var jsonRes = jsonDecode(rs.body);
+    if (rs.statusCode == 200) {
+      if (jsonRes['success'] == 1) {
+        showCustomSnackBar('Congratulations', 'deleteVideo Successfully',
+            ColorConstants.appColors, ContentType.success);
+        // _videosController.isLoading.value = false;
+        await _videosController.getVideos();
+        Get.back();
+      }
+      // await _postsController.getPosts();
+      // displaypost = _postsController.displaypost;
+      // }
+    } else if (rs.statusCode == 500) {
+      showCustomSnackBar(
+          'deleteVideo Failed',
+          'Database connection error',
+          Colors.red, // สีแดงหรือสีที่คุณต้องการ
+          ContentType.failure);
+    } else if (rs.statusCode == 498) {
+      _mainWrapperController.logOut();
+      showCustomSnackBar(
+          'deleteVideo Failed',
+          "Invalid token",
+          Colors.red, // สีแดงหรือสีที่คุณต้องการ
+          ContentType.failure);
+      // การส่งข้อมูลไม่สำเร็จ
     }
   }
 

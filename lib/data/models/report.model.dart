@@ -1,34 +1,36 @@
 // To parse this JSON data, do
 //
-//     final posts = postsFromJson(jsonString);
+//     final reports = reportsFromJson(jsonString);
 
 import 'dart:convert';
 
-Posts postsFromJson(String str) => Posts.fromJson(json.decode(str));
+Reports reportsFromJson(String str) => Reports.fromJson(json.decode(str));
 
-String postsToJson(Posts data) => json.encode(data.toJson());
+String reportsToJson(Reports data) => json.encode(data.toJson());
 
-class Posts {
-  List<Post>? posts;
+class Reports {
+  List<Report>? reports;
 
-  Posts({
-    this.posts,
+  Reports({
+    this.reports,
   });
 
-  factory Posts.fromJson(Map<String, dynamic> json) => Posts(
-        posts: json["posts"] == null
+  factory Reports.fromJson(Map<String, dynamic> json) => Reports(
+        reports: json["reports"] == null
             ? []
-            : List<Post>.from(json["posts"]!.map((x) => Post.fromJson(x))),
+            : List<Report>.from(
+                json["reports"]!.map((x) => Report.fromJson(x))),
       );
 
   Map<String, dynamic> toJson() => {
-        "posts": posts == null
+        "reports": reports == null
             ? []
-            : List<dynamic>.from(posts!.map((x) => x.toJson())),
+            : List<dynamic>.from(reports!.map((x) => x.toJson())),
       };
 }
 
-class Post {
+class Report {
+  int? reportId;
   int? postId;
   String? postMessage;
   int? postLike;
@@ -36,10 +38,13 @@ class Post {
   DateTime? postUpdateAt;
   String? postIsHide;
   int? countComment;
-  PersonDetails? personDetails;
   BandDetails? bandDetails;
+  CreateReportByuser? createReportByuser;
+  BandDetails? createReportByband;
+  CreateReportByuser? personDetails;
 
-  Post({
+  Report({
+    this.reportId,
     this.postId,
     this.postMessage,
     this.postLike,
@@ -47,11 +52,14 @@ class Post {
     this.postUpdateAt,
     this.postIsHide,
     this.countComment,
-    this.personDetails,
     this.bandDetails,
+    this.createReportByuser,
+    this.createReportByband,
+    this.personDetails,
   });
 
-  factory Post.fromJson(Map<String, dynamic> json) => Post(
+  factory Report.fromJson(Map<String, dynamic> json) => Report(
+        reportId: json["report_id"],
         postId: json["post_id"],
         postMessage: json["post_message"],
         postLike: json["post_like"],
@@ -63,15 +71,22 @@ class Post {
             : DateTime.parse(json["post_updateAt"]),
         postIsHide: json["post_isHide"],
         countComment: json["count_comment"],
-        personDetails: json["person_details"] == null
-            ? null
-            : PersonDetails.fromJson(json["person_details"]),
         bandDetails: json["band_details"] == null
             ? null
             : BandDetails.fromJson(json["band_details"]),
+        createReportByuser: json["createReportByuser"] == null
+            ? null
+            : CreateReportByuser.fromJson(json["createReportByuser"]),
+        createReportByband: json["createReportByband"] == null
+            ? null
+            : BandDetails.fromJson(json["createReportByband"]),
+        personDetails: json["person_details"] == null
+            ? null
+            : CreateReportByuser.fromJson(json["person_details"]),
       );
 
   Map<String, dynamic> toJson() => {
+        "report_id": reportId,
         "post_id": postId,
         "post_message": postMessage,
         "post_like": postLike,
@@ -79,8 +94,10 @@ class Post {
         "post_updateAt": postUpdateAt?.toIso8601String(),
         "post_isHide": postIsHide,
         "count_comment": countComment,
-        "person_details": personDetails?.toJson(),
         "band_details": bandDetails?.toJson(),
+        "createReportByuser": createReportByuser?.toJson(),
+        "createReportByband": createReportByband?.toJson(),
+        "person_details": personDetails?.toJson(),
       };
 }
 
@@ -124,7 +141,7 @@ class BandDetails {
       };
 }
 
-class PersonDetails {
+class CreateReportByuser {
   int? userId;
   String? userEmail;
   String? userName;
@@ -137,7 +154,7 @@ class PersonDetails {
   int? bandId;
   String? bandType;
 
-  PersonDetails({
+  CreateReportByuser({
     this.userId,
     this.userEmail,
     this.userName,
@@ -151,7 +168,8 @@ class PersonDetails {
     this.bandType,
   });
 
-  factory PersonDetails.fromJson(Map<String, dynamic> json) => PersonDetails(
+  factory CreateReportByuser.fromJson(Map<String, dynamic> json) =>
+      CreateReportByuser(
         userId: json["user_id"],
         userEmail: json["user_email"],
         userName: json["user_name"],

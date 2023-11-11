@@ -266,6 +266,12 @@ class _UploadVideoState extends State<UploadVideo> {
                                 autovalidateMode:
                                     AutovalidateMode.onUserInteraction,
                                 // ! ยังไม่ได้ทำ validator
+                                style: TextStyle(
+                                    color: Theme.of(context).brightness ==
+                                            Brightness.light
+                                        ? Colors
+                                            .grey[10] // สีสำหรับ Light Theme
+                                        : ColorConstants.appColors),
                                 validator: _messageValidator,
                                 controller: _messagecontroller,
                                 obscureText: false,

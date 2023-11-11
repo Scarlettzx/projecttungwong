@@ -14,11 +14,11 @@ class VideosController extends GetxController {
   final BandService bandService = Get.find();
   final RxBool isLoading = false.obs;
   final RxList<Video> videos = <Video>[].obs;
-
   Future<void> getVideos() async {
     print("getVideos()");
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('token');
+
     final Uri url = Uri.parse('${Config.endPoint}/api/videos/');
     final headers = {
       'Content-Type': 'application/json',
@@ -41,6 +41,91 @@ class VideosController extends GetxController {
         isLoading.value = false; // โหลดข้อมูลเสร็จสิ้น
       }); // โหลดข้อมูลเสร็จสิ้น
     }
+  }
+
+  Future<void> getVideosbyUserid(int userid) async {
+    print("getVideosbyUserid()");
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('token');
+    //  (bandService.bandsController.isBand.value == false)
+    final Uri url =
+        Uri.parse('${Config.endPoint}/api/videos/getVideosByuserid/$userid');
+    final headers = {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer $token',
+    };
+
+    try {
+      isLoading.value = true; // เริ่มโหลดข้อมูล
+      final response = await http.get(url, headers: headers);
+      if (response.statusCode == HttpStatus.ok) {
+        final videosData = videosFromJson(response.body);
+        videos.assignAll(videosData.videos!.whereType<Video>());
+        print("videos");
+        print(videos);
+      }
+    } catch (e) {
+      print('Error fetching posts: $e');
+    } finally {
+      Future.delayed(const Duration(seconds: 1), () {
+        isLoading.value = false; // โหลดข้อมูลเสร็จสิ้น
+      }); // โหลดข้อมูลเสร็จสิ้น
+    }
+  }
+
+  Future<void> getVideosbyBandid(int bandid) async {
+    print("getVideosbyBandid()");
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('token');
+    //  (bandService.bandsController.isBand.value == false)
+    final Uri url =
+        Uri.parse('${Config.endPoint}/api/videos/getVideosBybandid/$bandid');
+    final headers = {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer $token',
+    };
+
+    try {
+      isLoading.value = true; // เริ่มโหลดข้อมูล
+      final response = await http.get(url, headers: headers);
+      if (response.statusCode == HttpStatus.ok) {
+        final videosData = videosFromJson(response.body);
+        videos.assignAll(videosData.videos!.whereType<Video>());
+        print("videos");
+        print(videos);
+      }
+    } catch (e) {
+      print('Error fetching posts: $e');
+    } finally {
+      Future.delayed(const Duration(seconds: 1), () {
+        isLoading.value = false; // โหลดข้อมูลเสร็จสิ้น
+      }); // โหลดข้อมูลเสร็จสิ้น
+    }
+  }
+
+  Future<http.Response> editVideo(int videoid, String message) async {
+    // isLoading.value = true;
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('token');
+    final url = Uri.parse('${Config.endPoint}/api/videos/editvideo');
+    final headers = {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer $token',
+    };
+    final body = jsonEncode({'video_id': videoid, "video_message": message});
+    return await http.patch(url, headers: headers, body: body);
+  }
+
+  Future<http.Response> deleteVideo(int videoid) async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('token');
+    final url = Uri.parse('${Config.endPoint}/api/videos/deletevideo');
+    final headers = {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer $token',
+    };
+    final body = jsonEncode({'video_id': videoid});
+    return await http.delete(url, headers: headers, body: body);
   }
 
   @override

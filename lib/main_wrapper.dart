@@ -150,23 +150,35 @@ class _MainWrapperState extends State<MainWrapper> {
                 //  Spacer(),  // Use Spacer to distribute space evenly
                 if (bandService.profileController.profileList.isNotEmpty &&
                     bandService.profileController.profileList[0].userPosition !=
-                        "none")
+                        "none") ...[
                   _bottomAppBarItem(
                     context,
                     icon: IconlyLight.user_1,
                     page: 1,
                     label: "Band",
                   ),
+                ] else if (bandService
+                        .profileController.profileList.isNotEmpty &&
+                    bandService.profileController.profileList[0].userIsAdmin ==
+                        true.toString()) ...[
+                  _bottomAppBarItem(
+                    context,
+                    icon: IconlyLight.danger,
+                    page: 2,
+                    label: "Report",
+                  ),
+                ],
+
                 _bottomAppBarItem(
                   context,
                   icon: IconlyLight.search,
-                  page: 2,
+                  page: 3,
                   label: "Search",
                 ),
                 _bottomAppBarItem(
                   context,
                   icon: IconlyLight.profile,
-                  page: 3,
+                  page: 4,
                   label: "Profile",
                 ),
               ],

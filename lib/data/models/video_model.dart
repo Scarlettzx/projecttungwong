@@ -35,6 +35,7 @@ class Video {
   int? videoLike;
   DateTime? videoCreateAt;
   DateTime? videoUpdateAt;
+  int? countComment;
   PersonDetails? personDetails;
   BandDetails? bandDetails;
 
@@ -45,6 +46,7 @@ class Video {
     this.videoLike,
     this.videoCreateAt,
     this.videoUpdateAt,
+    this.countComment,
     this.personDetails,
     this.bandDetails,
   });
@@ -60,6 +62,7 @@ class Video {
         videoUpdateAt: json["video_updateAt"] == null
             ? null
             : DateTime.parse(json["video_updateAt"]),
+            countComment: json["count_comment"],
         personDetails: json["person_details"] == null
             ? null
             : PersonDetails.fromJson(json["person_details"]),
@@ -75,6 +78,7 @@ class Video {
         "video_like": videoLike,
         "video_createAt": videoCreateAt?.toIso8601String(),
         "video_updateAt": videoUpdateAt?.toIso8601String(),
+         "count_comment": countComment,
         "person_details": personDetails?.toJson(),
         "band_details": bandDetails?.toJson(),
       };

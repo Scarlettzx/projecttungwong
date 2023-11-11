@@ -26,6 +26,7 @@ class Notifications {
 
 class Notification {
     int? notiId;
+    String? notiMessage;
     String? notiType;
     DateTime? notiCreateAt;
     PersonDetails? personDetails;
@@ -33,6 +34,7 @@ class Notification {
 
     Notification({
         this.notiId,
+        this.notiMessage,
         this.notiType,
         this.notiCreateAt,
         this.personDetails,
@@ -41,6 +43,7 @@ class Notification {
 
     factory Notification.fromJson(Map<String, dynamic> json) => Notification(
         notiId: json["noti_id"],
+        notiMessage: json["noti_message"],
         notiType: json["noti_type"],
         notiCreateAt: json["noti_createAt"] == null ? null : DateTime.parse(json["noti_createAt"]),
         personDetails: json["person_details"] == null ? null : PersonDetails.fromJson(json["person_details"]),
@@ -49,6 +52,7 @@ class Notification {
 
     Map<String, dynamic> toJson() => {
         "noti_id": notiId,
+        "noti_message": notiMessage,
         "noti_type": notiType,
         "noti_createAt": notiCreateAt?.toIso8601String(),
         "person_details": personDetails?.toJson(),

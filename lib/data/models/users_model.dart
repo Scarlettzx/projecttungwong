@@ -34,8 +34,8 @@ class User {
     String? userIsAdmin;
     DateTime? userCreateAt;
     DateTime? userUpdateAt;
-    int? bandId;
     String? bandType;
+    String? bandName;
 
     User({
         this.userId,
@@ -47,8 +47,8 @@ class User {
         this.userIsAdmin,
         this.userCreateAt,
         this.userUpdateAt,
-        this.bandId,
         this.bandType,
+        this.bandName,
     });
 
     factory User.fromJson(Map<String, dynamic> json) => User(
@@ -61,8 +61,8 @@ class User {
         userIsAdmin: json["user_isAdmin"],
         userCreateAt: json["user_createAt"] == null ? null : DateTime.parse(json["user_createAt"]),
         userUpdateAt: json["user_updateAt"] == null ? null : DateTime.parse(json["user_updateAt"]),
-        bandId: json["band_id"],
         bandType: json["band_Type"],
+        bandName: json["band_name"],
     );
 
     Map<String, dynamic> toJson() => {
@@ -75,7 +75,7 @@ class User {
         "user_isAdmin": userIsAdmin,
         "user_createAt": userCreateAt?.toIso8601String(),
         "user_updateAt": userUpdateAt?.toIso8601String(),
-        "band_id": bandId,
         "band_Type": bandType,
+        "band_name": bandName,
     };
 }

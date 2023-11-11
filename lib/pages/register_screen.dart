@@ -32,6 +32,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   String? selectedValueProvince;
   String? selectedValuePosition = "none";
   // ! Text editing controllers
+  final GlobalKey<FormState> _otpFormKey = GlobalKey<FormState>();
   final usernameController = TextEditingController();
   final emailController = TextEditingController();
   final countryController = TextEditingController();
@@ -69,6 +70,18 @@ class _RegisterScreenState extends State<RegisterScreen> {
         RegExp(r'^[\w-]+(\.[\w-]+)*@([\w-]+\.)+[a-zA-Z]{2,7}$');
     if (!emailRegExp.hasMatch(fieldContent)) {
       return 'Please enter a valid email';
+    }
+    return null;
+  }
+
+  String? _otplValidator(String? fieldContent) {
+    if (fieldContent == null || fieldContent.isEmpty) {
+      return 'Please enter otp';
+    }
+    RegExp otpRegExp =
+        RegExp(r'^[0-9]{6}$'); // OTP ต้องประกอบด้วยตัวเลข 6 หลักเท่านั้น
+    if (!otpRegExp.hasMatch(fieldContent)) {
+      return 'Please enter a valid OTP (6 digits)';
     }
     return null;
   }
@@ -125,7 +138,80 @@ class _RegisterScreenState extends State<RegisterScreen> {
       ..showSnackBar(snackBar);
   }
 
-  Future doRegister() async {
+  Future doCreateOtp(BuildContext context) async {
+    final otpController = TextEditingController();
+    if (_formKey.currentState!.validate()) {
+      if (imageFile != null) {
+        var rs = await apiProvider
+            .doCreateOtp(emailController.text.trim().toLowerCase());
+        var jsonRes = json.decode(rs.body);
+        if (jsonRes['success'] == 1) {
+          setState(() {
+            _saving = true;
+          });
+          showCustomSnackBar('Otp', 'Please check the otp code at gmail.',
+              ColorConstants.appColors, ContentType.warning);
+          Future.delayed(new Duration(seconds: 4), () {
+            setState(() {
+              _saving = false;
+            });
+            otpController.clear();
+            showDialog<String>(
+              context: context,
+              builder: (BuildContext context) => AlertDialog(
+                title: const Text('Otp'),
+                content: Form(
+                  key: _otpFormKey,
+                  child: TextFormField(
+                    cursorColor: ColorConstants.appColors,
+                    validator: _otplValidator,
+                    controller: otpController,
+                    keyboardType: TextInputType.number,
+                    maxLines: 1,
+                    decoration: const InputDecoration(
+                      labelText: 'Otp',
+                      hintMaxLines: 1,
+                      border: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.green, width: 4.0),
+                      ),
+                    ),
+                  ),
+                ),
+                actions: <Widget>[
+                  TextButton(
+                    onPressed: () => Navigator.pop(context, 'Cancel'),
+                    child: const Text('Cancel'),
+                  ),
+                  TextButton(
+                    onPressed: () {
+                      if (_otpFormKey.currentState!.validate()) {
+                        doRegister(otpController.text);
+                      }
+                    },
+                    child: const Text('OK'),
+                  ),
+                ],
+              ),
+            );
+          });
+        } else if (jsonRes['success'] == 0) {
+          showCustomSnackBar(
+              'Otp Failed',
+              'That Email Address is already in use! Please try with a different one.',
+              Colors.red, // สีแดงหรือสีที่คุณต้องการ
+              ContentType.failure);
+        }
+      } else {
+        showCustomSnackBar(
+            'Sign Up Failed',
+            "You haven't added a picture yet! Please include a picture.",
+            Colors.red, // สีแดงหรือสีที่คุณต้องการ
+            ContentType.failure);
+      }
+    }
+  }
+
+  Future doRegister(String otp) async {
     if (_formKey.currentState!.validate()) {
       if (imageFile != null) {
         var rs = await apiProvider.doRegister(
@@ -134,7 +220,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
             selectedValuePosition!,
             emailController.text.trim().toLowerCase(),
             passwordController.text.trim(),
-            imageFile!.path);
+            imageFile!.path, otp);
         if (rs.statusCode == 200) {
           print(rs.body);
           var jsonRes = json.decode(rs.body);
@@ -159,11 +245,20 @@ class _RegisterScreenState extends State<RegisterScreen> {
           var jsonRes = json.decode(rs.body);
           print(rs.body);
           if (jsonRes['success'] == 0) {
+            if(jsonRes['message'] == 'Missing verification code'){
+            showCustomSnackBar(
+                'Sign Up Failed',
+                "Missing verification code",
+                Colors.red, // สีแดงหรือสีที่คุณต้องการ
+                ContentType.failure);
+            }else{
             showCustomSnackBar(
                 'Sign Up Failed',
                 "You haven't added a picture yet! Please include a picture.",
                 Colors.red, // สีแดงหรือสีที่คุณต้องการ
                 ContentType.failure);
+
+            }
           } else if (jsonRes['message'] == 'Invalid image file type') {
             showCustomSnackBar(
                 'Sign Up Failed',
@@ -204,9 +299,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
           child: ModalProgressHUD(
             inAsyncCall: _saving,
             progressIndicator: LoadingAnimationWidget.bouncingBall(
-        size: 50,
-        color: ColorConstants.appColors,
-      ),
+              size: 50,
+              color: ColorConstants.appColors,
+            ),
             child: SingleChildScrollView(
               child: Center(
                 child: Form(
@@ -532,7 +627,40 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       // ! buttonอันเก่า
                       Center(
                         child: ElevatedButton(
-                          onPressed: doRegister,
+                          // onPressed: doRegister,
+                          onPressed: () => doCreateOtp(context),
+                          // showDialog<String>(
+                          //   context: context,
+                          //   builder: (BuildContext context) => AlertDialog(
+                          //     title: const Text('Otp'),
+                          //     content: TextFormField(
+                          //       cursorColor: ColorConstants.appColors,
+                          //       validator: _otplValidator,
+                          //       controller: otpController,
+                          //       keyboardType: TextInputType.number,
+                          //       maxLines: 1,
+                          //       decoration: const InputDecoration(
+                          //         labelText: 'Otp',
+                          //         hintMaxLines: 1,
+                          //         border: OutlineInputBorder(
+                          //           borderSide: BorderSide(
+                          //               color: Colors.green, width: 4.0),
+                          //         ),
+                          //       ),
+                          //     ),
+                          //     actions: <Widget>[
+                          //       TextButton(
+                          //         onPressed: () =>
+                          //             Navigator.pop(context, 'Cancel'),
+                          //         child: const Text('Cancel'),
+                          //       ),
+                          //       TextButton(
+                          //         onPressed: () => Navigator.pop(context, 'OK'),
+                          //         child: const Text('OK'),
+                          //       ),
+                          //     ],
+                          //   ),
+
                           style: ElevatedButton.styleFrom(
                               padding: EdgeInsets.zero,
                               shape: RoundedRectangleBorder(

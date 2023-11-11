@@ -48,14 +48,14 @@ class _BandTabState extends State<BandTab> {
     // print(
     //     "bandService.bandsController.bandModelData.value!.band.bandId ================================");
     // print(bandService.bandsController.bandModelData.value!.band.bandId);
-
+    bandService.profileController.isvideo.value = false;
     // bandController.showMemberInBand(context);
     // bandController.getProfile();
     // bandController.profileMap!["userId"];
     // profileController.loadProfileData();
     // print("========== createBand Value ===============");
     // print(bandController.createBand.value);
-    ;
+    // ;
   }
 
   @override

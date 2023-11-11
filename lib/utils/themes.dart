@@ -99,7 +99,7 @@ class Themes {
         )),
     cardColor: ColorConstants.gray700,
     progressIndicatorTheme:
-        const ProgressIndicatorThemeData(color: Colors.white),
+        const ProgressIndicatorThemeData(color: Colors.red),
     textTheme: TextTheme(
         headline1: TextStyle(
             letterSpacing: -1.5,

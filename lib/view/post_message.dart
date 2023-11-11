@@ -9,8 +9,11 @@ import 'package:project/controller/poststest_controller.dart';
 import 'package:project/utils/color.constants.dart';
 import '../controller/comments_controller.dart';
 import '../controller/main_wrapper_controller.dart';
+import '../services/bandservice.dart';
 import '../utils/config.dart';
 import 'package:get_time_ago/get_time_ago.dart';
+
+import 'another_profile_tab.dart';
 
 class PostMessage extends StatefulWidget {
   final String postMessage; // เพิ่มพารามิเตอร์เพื่อรับข้อมูล
@@ -22,6 +25,7 @@ class PostMessage extends StatefulWidget {
 }
 
 class _PostMessageState extends State<PostMessage> {
+  final BandService bandService = Get.find();
   final PoststestController _postsController = Get.find<PoststestController>();
   final _keyForm = GlobalKey<FormState>();
   final MainWrapperController _mainWrapperController =
@@ -99,6 +103,9 @@ class _PostMessageState extends State<PostMessage> {
       },
       child: Scaffold(
         resizeToAvoidBottomInset: true,
+        backgroundColor: Theme.of(context).brightness == Brightness.light
+            ? Colors.white // สีสำหรับ Light Theme
+            : ColorConstants.appColors,
         appBar: AppBar(
           elevation: 5,
           leading: IconButton(
@@ -192,8 +199,15 @@ class _PostMessageState extends State<PostMessage> {
                                               _commentspostscontroller
                                                   .comments[reverseindex]
                                                   .commentMessage!,
-                                              style:
-                                                  const TextStyle(fontSize: 17),
+                                              style: TextStyle(
+                                                  color: Theme.of(context)
+                                                              .brightness ==
+                                                          Brightness.light
+                                                      ? Colors
+                                                          .black // สีสำหรับ Light Theme
+                                                      : ColorConstants
+                                                          .appColors,
+                                                  fontSize: 17),
                                             ),
                                           ),
                                           // isThreeLine: true,
@@ -210,31 +224,104 @@ class _PostMessageState extends State<PostMessage> {
                                                       40, // ปรับขนาดของ Container ตามต้องการ
                                                   height:
                                                       70, // ปรับขนาดของ Container ตามต้องการ
-                                                  child: CircleAvatar(
-                                                    // radius: 10,
-                                                    backgroundColor:
+                                                  child: InkWell(
+                                                    splashColor:
                                                         Colors.transparent,
-                                                    backgroundImage:
-                                                        _commentspostscontroller
-                                                                .comments[
-                                                                    reverseindex]
-                                                                .bandDetails!
-                                                                .bandAvatar!
-                                                                .isEmpty
-                                                            ? null
-                                                            : NetworkImage(
-                                                                '${Config.getImageBand}${_commentspostscontroller.comments[reverseindex].bandDetails!.bandAvatar}'),
+                                                    highlightColor:
+                                                        Colors.transparent,
+                                                    onTap: () async {
+                                                      var bandid =
+                                                          _commentspostscontroller
+                                                              .comments[
+                                                                  reverseindex]
+                                                              .bandDetails!
+                                                              .bandId;
+                                                      // ! เอาค่าbandidเก็บใน anotherprofileid เพื่อจะเข้า method
+                                                      bandService
+                                                          .profileController
+                                                          .anotherprofileid
+                                                          .value = bandid!;
+                                                      bandService
+                                                          .profileController
+                                                          .anotherProfileType
+                                                          .value = "band";
+                                                      // bandService
+                                                      //     .bandsController
+                                                      //     .anotherbandid
+                                                      //     .value = bandid;
+                                                      print(bandService
+                                                          .profileController
+                                                          .anotherProfileType
+                                                          .value);
+                                                      print(bandService
+                                                          .profileController
+                                                          .anotherprofileid
+                                                          .value);
+                                                      try {
+                                                        await bandService
+                                                            .profileController
+                                                            .checkfollow();
+                                                        await bandService
+                                                            .notificationController
+                                                            .checkSendEmail();
+                                                      } catch (e) {
+                                                        print("Error: $e");
+                                                        // Handle the error as needed
+                                                      }
+
+                                                      // bandService.notificationController
+                                                      //     .checkInviteBand();
+                                                      Get.to(
+                                                          transition: Transition
+                                                              .downToUp,
+                                                          AnotherProfileTab(
+                                                            anotherpofileid:
+                                                                bandid,
+                                                          ));
+                                                    },
+                                                    child: CircleAvatar(
+                                                      // radius: 10,
+                                                      backgroundColor:
+                                                          Colors.transparent,
+                                                      backgroundImage:
+                                                          _commentspostscontroller
+                                                                  .comments[
+                                                                      reverseindex]
+                                                                  .bandDetails!
+                                                                  .bandAvatar!
+                                                                  .isEmpty
+                                                              ? null
+                                                              : NetworkImage(
+                                                                  '${Config.getImageBand}${_commentspostscontroller.comments[reverseindex].bandDetails!.bandAvatar}'),
+                                                    ),
                                                   ),
                                                 ),
                                               ),
-                                              Text(_commentspostscontroller
-                                                  .comments[reverseindex]
-                                                  .bandDetails!
-                                                  .bandCategory!),
+                                              Text(
+                                                _commentspostscontroller
+                                                    .comments[reverseindex]
+                                                    .bandDetails!
+                                                    .bandCategory!,
+                                                style: TextStyle(
+                                                    color: Theme.of(context)
+                                                                .brightness ==
+                                                            Brightness.light
+                                                        ? Colors
+                                                            .black // สีสำหรับ Light Theme
+                                                        : ColorConstants
+                                                            .appColors),
+                                              ),
                                             ],
                                           ),
 
                                           trailing: Text(
+                                            style: TextStyle(
+                                                color: Theme.of(context)
+                                                            .brightness ==
+                                                        Brightness.light
+                                                    ? Colors
+                                                        .black // สีสำหรับ Light Theme
+                                                    : ColorConstants.appColors),
                                             GetTimeAgo.parse(datetime),
                                           ),
                                         ),
@@ -250,8 +337,15 @@ class _PostMessageState extends State<PostMessage> {
                                               _commentspostscontroller
                                                   .comments[reverseindex]
                                                   .commentMessage!,
-                                              style:
-                                                  const TextStyle(fontSize: 17),
+                                              style: TextStyle(
+                                                  color: Theme.of(context)
+                                                              .brightness ==
+                                                          Brightness.light
+                                                      ? Colors
+                                                          .black // สีสำหรับ Light Theme
+                                                      : ColorConstants
+                                                          .appColors,
+                                                  fontSize: 17),
                                             ),
                                           ),
                                           // isThreeLine: true,
@@ -268,31 +362,107 @@ class _PostMessageState extends State<PostMessage> {
                                                       40, // ปรับขนาดของ Container ตามต้องการ
                                                   height:
                                                       70, // ปรับขนาดของ Container ตามต้องการ
-                                                  child: CircleAvatar(
-                                                    // radius: 10,
-                                                    backgroundColor:
-                                                        Colors.transparent,
-                                                    backgroundImage:
-                                                        _commentspostscontroller
+                                                  child: InkWell(
+                                                    onTap: () async {
+                                                      if (_commentspostscontroller
+                                                              .comments[
+                                                                  reverseindex]
+                                                              .personDetails!
+                                                              .userIsAdmin !=
+                                                          true.toString()) {
+                                                        var userid =
+                                                            _commentspostscontroller
                                                                 .comments[
                                                                     reverseindex]
                                                                 .personDetails!
-                                                                .userAvatar!
-                                                                .isEmpty
-                                                            ? null
-                                                            : NetworkImage(
-                                                                '${Config.getImage}${_commentspostscontroller.comments[reverseindex].personDetails!.userAvatar}'),
+                                                                .userId;
+
+                                                        bandService
+                                                            .profileController
+                                                            .anotherprofileid
+                                                            .value = userid!;
+                                                        bandService
+                                                            .profileController
+                                                            .anotherProfileType
+                                                            .value = "user";
+                                                        print(bandService
+                                                            .profileController
+                                                            .anotherProfileType
+                                                            .value);
+                                                        print(bandService
+                                                            .profileController
+                                                            .anotherprofileid
+                                                            .value);
+                                                        try {
+                                                          await bandService
+                                                              .profileController
+                                                              .checkfollow();
+                                                          await bandService
+                                                              .notificationController
+                                                              .checkInviteBand();
+                                                          await bandService
+                                                              .notificationController
+                                                              .checkSendEmail();
+                                                        } catch (e) {
+                                                          print("Error: $e");
+                                                          // Handle the error as needed
+                                                        }
+
+                                                        Get.to(
+                                                            transition:
+                                                                Transition
+                                                                    .downToUp,
+                                                            AnotherProfileTab(
+                                                              anotherpofileid:
+                                                                  userid,
+                                                            ));
+                                                      } else {
+                                                        null;
+                                                      }
+                                                    },
+                                                    child: CircleAvatar(
+                                                      // radius: 10,
+                                                      backgroundColor:
+                                                          Colors.transparent,
+                                                      backgroundImage:
+                                                          _commentspostscontroller
+                                                                  .comments[
+                                                                      reverseindex]
+                                                                  .personDetails!
+                                                                  .userAvatar!
+                                                                  .isEmpty
+                                                              ? null
+                                                              : NetworkImage(
+                                                                  '${Config.getImage}${_commentspostscontroller.comments[reverseindex].personDetails!.userAvatar}'),
+                                                    ),
                                                   ),
                                                 ),
                                               ),
-                                              Text(_commentspostscontroller
-                                                  .comments[reverseindex]
-                                                  .personDetails!
-                                                  .userPosition!),
+                                              Text(
+                                                _commentspostscontroller
+                                                    .comments[reverseindex]
+                                                    .personDetails!
+                                                    .userPosition!,
+                                                style: TextStyle(
+                                                    color: Theme.of(context)
+                                                                .brightness ==
+                                                            Brightness.light
+                                                        ? Colors
+                                                            .black // สีสำหรับ Light Theme
+                                                        : ColorConstants
+                                                            .appColors),
+                                              ),
                                             ],
                                           ),
 
                                           trailing: Text(
+                                            style: TextStyle(
+                                                color: Theme.of(context)
+                                                            .brightness ==
+                                                        Brightness.light
+                                                    ? Colors
+                                                        .black // สีสำหรับ Light Theme
+                                                    : ColorConstants.appColors),
                                             GetTimeAgo.parse(datetime),
                                           ),
                                         ),
@@ -315,6 +485,11 @@ class _PostMessageState extends State<PostMessage> {
                     padding: const EdgeInsets.symmetric(
                         horizontal: 25.0, vertical: 5),
                     child: TextFormField(
+                      style: TextStyle(
+                          color:
+                              Theme.of(context).brightness == Brightness.light
+                                  ? Colors.black // สีสำหรับ Light Theme
+                                  : ColorConstants.appColors),
                       cursorColor: Colors.white,
                       // key: _textFormFieldKey,
                       // autovalidateMode: AutovalidateMode.always,
@@ -323,7 +498,6 @@ class _PostMessageState extends State<PostMessage> {
                       obscureText: false,
                       keyboardType: TextInputType.text,
                       decoration: InputDecoration(
-                        
                         // isDense: true,
                         hintText: "Comment",
                         hintStyle: const TextStyle(

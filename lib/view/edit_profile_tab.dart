@@ -33,9 +33,10 @@ class _EditProfileTabState extends State<EditProfileTab> {
   final ImagePicker _picker = ImagePicker();
   bool hidePassword = true;
   bool hideConfirmPassword = true;
-  final _formKey = GlobalKey<FormState>();
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   String? selectedValueProvince;
   String? selectedValuePosition;
+
   // ! Text editing controllers
   final usernameController = TextEditingController();
   // final emailController = TextEditingController();
@@ -48,19 +49,87 @@ class _EditProfileTabState extends State<EditProfileTab> {
   @override
   void initState() {
     super.initState();
-    // _assetImagesDevice();
-    // กำหนดค่าเริ่มต้นให้ usernameController
+    print("bandService.profileController.anotherProfileType.value");
+    print(bandService.profileController.anotherProfileType.value);
+//           final isBand = bandService.bandsController.isBand.value;
+// final profileType = bandService.profileController.anotherProfileType.value;
+//     // _assetImagesDevice();
+//     // กำหนดค่าเริ่มต้นให้ usernameController
+//     // print(imageFile?.path);
+//     // print("bandService.profileController.anotherProfileType");
+//     // print(bandService.profileController.anotherProfileType);
+//     // print("bandService.profileController.bandList[0].bandName");
+//     // print(bandService.bandsController.bandList[0].bandName);
+//     // print("bandService.bandsController.bandList[0].bandAvatar");
+//     // print(bandService.bandsController.bandList[0].bandAvatar);
+
+// Widget avatarImage;
+// if (isBand) {
+//   if (profileType == "") {
+//     final bandList = bandService.bandsController.bandList;
+//     final bandAvatar = bandList.isNotEmpty ? bandList[0].bandAvatar : "";
+
+//     if (bandAvatar != "" && imageFile == null) {
+//       avatarImage = Image.network(
+//         '${Config.getImageBand}$bandAvatar',
+//         fit: BoxFit.cover,
+//       ).image;
+//     } else {
+//       avatarImage = Image.file(
+//         File(imageFile!.path).absolute,
+//         fit: BoxFit.cover,
+//       ).image;
+//     }
+//   } else if (profileType == "band") {
+//     final bandAnotherProfile = bandService.bandsController.bandanotherprofile;
+//     final bandAvatar = bandAnotherProfile.isNotEmpty ? bandAnotherProfile[0].bandAvatar : "";
+
+//     if (bandAvatar != "" && imageFile == null) {
+//       avatarImage = Image.network(
+//         '${Config.getImageBand}$bandAvatar',
+//         fit: BoxFit.cover,
+//       ).image;
+//     } else {
+//       avatarImage = Image.file(
+//         File(imageFile!.path).absolute,
+//         fit: BoxFit.cover,
+//       ).image;
+//     }
+//   }
+// }
+    print(nameController.text);
+    print(categoryController.text);
     if (bandService.bandsController.isBand.value == false) {
-      usernameController.text =
-          bandService.profileController.profileList[0].userName;
-      selectedValueProvince =
-          bandService.profileController.profileList[0].userCountry;
-      selectedValuePosition =
-          bandService.profileController.profileList[0].userPosition;
+      if (bandService.profileController.anotherProfileType.value == "") {
+        usernameController.text =
+            bandService.profileController.profileList[0].userName;
+        selectedValueProvince =
+            bandService.profileController.profileList[0].userCountry;
+        selectedValuePosition =
+            bandService.profileController.profileList[0].userPosition;
+      } else if (bandService.profileController.anotherProfileType.value ==
+          "user") {
+        usernameController.text =
+            bandService.profileController.useranotherprofile[0].userName;
+        selectedValueProvince =
+            bandService.profileController.useranotherprofile[0].userCountry;
+        selectedValuePosition =
+            bandService.profileController.useranotherprofile[0].userPosition;
+      }
     } else if (bandService.bandsController.isBand.value == true) {
-      nameController.text = bandService.bandsController.bandList[0].bandName;
-      categoryController.text =
-          bandService.bandsController.bandList[0].bandCategory;
+      if (bandService.profileController.anotherProfileType.value == "") {
+        nameController.text = bandService.bandsController.bandList[0].bandName;
+        categoryController.text =
+            bandService.bandsController.bandList[0].bandCategory;
+        print(nameController.text);
+        print(categoryController.text);
+      } else if (bandService.profileController.anotherProfileType.value ==
+          "band") {
+        nameController.text =
+            bandService.profileController.bandanotherprofile[0].bandName;
+        categoryController.text =
+            bandService.profileController.bandanotherprofile[0].bandCategory;
+      }
     }
   }
   // usernameController = TextEditingController();
@@ -81,6 +150,48 @@ class _EditProfileTabState extends State<EditProfileTab> {
     // _textcommentController.dispose();
     usernameController.dispose();
   }
+
+  // CheckImage() {
+  //   if (bandService.bandsController.isBand.value) {
+  //     final profileType =
+  //         bandService.profileController.anotherProfileType.value;
+
+  //     if (profileType == "") {
+  //       final bandList = bandService.bandsController.bandList;
+  //       final bandAvatar = bandList.isNotEmpty ? bandList[0].bandAvatar : "";
+
+  //       if (bandAvatar != "" && imageFile == null) {
+  //         return Image.network(
+  //           '${Config.getImageBand}$bandAvatar',
+  //           fit: BoxFit.cover,
+  //         );
+  //       } else {
+  //         return Image.file(
+  //           File(imageFile!.path).absolute,
+  //           fit: BoxFit.cover,
+  //         );
+  //       }
+  //     } else if (profileType == "band") {
+  //       final bandAnotherProfile =
+  //           bandService.profileController.bandanotherprofile;
+  //       final bandAvatar = bandAnotherProfile.isNotEmpty
+  //           ? bandAnotherProfile[0].bandAvatar
+  //           : "";
+
+  //       if (bandAvatar != "" && imageFile == null) {
+  //         return Image.network(
+  //           '${Config.getImageBand}$bandAvatar',
+  //           fit: BoxFit.cover,
+  //         );
+  //       } else {
+  //         return Image.file(
+  //           File(imageFile!.path).absolute,
+  //           fit: BoxFit.cover,
+  //         );
+  //       }
+  //     }
+  //   }
+  // }
 
   String? _nameValidator(String? fieldContent) {
     RegExp nameRegExp = RegExp(r"^[a-zA-Z0-9_\.\-]*$");
@@ -195,8 +306,22 @@ class _EditProfileTabState extends State<EditProfileTab> {
                                                   "" &&
                                               imageFile == null
                                           ? Image.network(
-                                                  '${Config.getImage}${bandService.profileController.profileList[0].userAvatar}')
-                                              .image
+                                              (bandService
+                                                          .profileController
+                                                          .anotherProfileType
+                                                          .value ==
+                                                      "")
+                                                  ? '${Config.getImage}${bandService.profileController.profileList[0].userAvatar}'
+                                                  : (bandService
+                                                              .profileController
+                                                              .anotherProfileType
+                                                              .value ==
+                                                          "user")
+                                                      ? '${Config.getImage}${bandService.profileController.useranotherprofile[0].userAvatar}'
+                                                      : "assets/default.jpg",
+                                              fit: BoxFit
+                                                  .cover, // Set the fit property to your desired value
+                                            ).image
                                           : Image.file(
                                                   File(imageFile!.path)
                                                       .absolute,
@@ -231,6 +356,12 @@ class _EditProfileTabState extends State<EditProfileTab> {
                                     autovalidateMode:
                                         AutovalidateMode.onUserInteraction,
                                     // ! ยังไม่ได้ทำ validator
+                                    style: TextStyle(
+                                        color: Theme.of(context).brightness ==
+                                                Brightness.light
+                                            ? Colors.grey[
+                                                10] // สีสำหรับ Light Theme
+                                            : ColorConstants.appColors),
                                     // initialValue:
                                     //     'Complete the story from here...', // <-- SEE HERE
                                     validator: _usernameValidator,
@@ -279,8 +410,12 @@ class _EditProfileTabState extends State<EditProfileTab> {
                                             value: selectedValueProvince,
                                             menuMaxHeight: 700,
                                             style: TextStyle(
-                                              color: ColorConstants.gray600,
-                                            ),
+                                                color: Theme.of(context)
+                                                            .brightness ==
+                                                        Brightness.light
+                                                    ? Colors
+                                                        .black // สีสำหรับ Light Theme
+                                                    : ColorConstants.appColors),
                                             // autofocus: true,
                                             icon: Icon(
                                               Icons.arrow_drop_down_circle,
@@ -344,8 +479,11 @@ class _EditProfileTabState extends State<EditProfileTab> {
                                     value: selectedValuePosition,
                                     menuMaxHeight: 700,
                                     style: TextStyle(
-                                      color: ColorConstants.gray600,
-                                    ),
+                                        color: Theme.of(context).brightness ==
+                                                Brightness.light
+                                            ? Colors
+                                                .black // สีสำหรับ Light Theme
+                                            : ColorConstants.appColors),
                                     // autofocus: true,
                                     icon: Icon(
                                       Icons.arrow_drop_down_circle,
@@ -402,7 +540,8 @@ class _EditProfileTabState extends State<EditProfileTab> {
                                 ),
                                 const SizedBox(height: 20),
                                 ElevatedButton(
-                                  onPressed: () => editProfile(context),
+                                  onPressed: () async =>
+                                      await editProfile(context),
                                   style: ElevatedButton.styleFrom(
                                       padding: EdgeInsets.zero,
                                       shape: RoundedRectangleBorder(
@@ -446,19 +585,92 @@ class _EditProfileTabState extends State<EditProfileTab> {
                                       radius: 50,
                                       backgroundColor: Colors.transparent,
                                       backgroundImage: bandService
-                                                      .bandsController
-                                                      .bandList[0]
-                                                      .bandAvatar !=
-                                                  "" &&
-                                              imageFile == null
-                                          ? Image.network(
-                                                  '${Config.getImageBand}${bandService.bandsController.bandList[0].bandAvatar}')
-                                              .image
-                                          : Image.file(
-                                                  File(imageFile!.path)
-                                                      .absolute,
-                                                  fit: BoxFit.cover)
-                                              .image,
+                                              .bandsController.isBand.value
+                                          ? (() {
+                                              final profileType = bandService
+                                                  .profileController
+                                                  .anotherProfileType
+                                                  .value;
+
+                                              if (profileType == "") {
+                                                final bandList = bandService
+                                                    .bandsController.bandList;
+                                                final bandAvatar =
+                                                    bandList.isNotEmpty
+                                                        ? bandList[0].bandAvatar
+                                                        : "";
+
+                                                if (bandAvatar != "" &&
+                                                    imageFile == null) {
+                                                  return NetworkImage(
+                                                          '${Config.getImageBand}$bandAvatar')
+                                                      as ImageProvider<Object>;
+                                                } else {
+                                                  return FileImage(
+                                                          File(imageFile!.path)
+                                                              .absolute)
+                                                      as ImageProvider<Object>;
+                                                }
+                                              } else if (profileType ==
+                                                  "band") {
+                                                final bandAnotherProfile =
+                                                    bandService
+                                                        .profileController
+                                                        .bandanotherprofile;
+                                                final bandAvatar =
+                                                    bandAnotherProfile
+                                                            .isNotEmpty
+                                                        ? bandAnotherProfile[0]
+                                                            .bandAvatar
+                                                        : "";
+
+                                                if (bandAvatar != "" &&
+                                                    imageFile == null) {
+                                                  return NetworkImage(
+                                                          '${Config.getImageBand}$bandAvatar')
+                                                      as ImageProvider<Object>;
+                                                } else {
+                                                  return FileImage(
+                                                          File(imageFile!.path)
+                                                              .absolute)
+                                                      as ImageProvider<Object>;
+                                                }
+                                              }
+                                            })()
+                                          : null,
+                                      // (bandService
+                                      //                 .profileController
+                                      //                 .bandanotherprofile[0]
+                                      //                 .bandAvatar !=
+                                      //             "" ||
+                                      //         bandService
+                                      //                     .bandsController
+                                      //                     .bandList[0]
+                                      //                     .bandAvatar !=
+                                      //                 "" &&
+                                      //             imageFile == null)
+                                      //     ? Image.network(
+                                      //         (bandService
+                                      //                     .profileController
+                                      //                     .anotherProfileType
+                                      //                     .value ==
+                                      //                 "")
+                                      //             ? '${Config.getImageBand}${bandService.bandsController.bandList[0].bandAvatar}'
+                                      //             : (bandService
+                                      //                         .profileController
+                                      //                         .anotherProfileType
+                                      //                         .value ==
+                                      //                     "band")
+                                      //                 ? '${Config.getImageBand}${bandService.profileController.bandanotherprofile[0].bandAvatar}'
+                                      //                 : "assets/default.jpg",
+                                      //         fit: BoxFit
+                                      //             .cover, // Set the fit property to your desired value
+                                      //       ).image
+                                      //     : Image.file(
+                                      //             File(imageFile!.path)
+                                      //                 .absolute,
+                                      //             fit: BoxFit.cover)
+                                      //         .image,
                                     ),
                                     Positioned(
                                       bottom: 15,
@@ -703,11 +915,11 @@ class _EditProfileTabState extends State<EditProfileTab> {
         var jsonRes = json.decode(rs.body);
         if (rs.statusCode == 200) {
           if (jsonRes['success'] == 1) {
+            setState(() {
+              _saving = true;
+            });
             if (mounted) {
-              setState(() {
-                _saving = true;
-              });
-              showCustomSnackBar('Congratulations', 'CreateBand Successfully',
+              showCustomSnackBar('Congratulations', 'EditProfile Successfully',
                   ColorConstants.appColors, ContentType.success);
               Future.delayed(const Duration(seconds: 4), () async {
                 if (mounted) {
@@ -716,26 +928,39 @@ class _EditProfileTabState extends State<EditProfileTab> {
                   setState(() {
                     _saving = false;
                   });
-                  _loadData();
+                  if (bandService.profileController.anotherProfileType.value ==
+                      "") {
+                    await _loadData();
+                  } else if (bandService
+                          .profileController.anotherProfileType.value ==
+                      "user") {
+                    await _loadDataAnotherProfile();
+                  }
                   Get.back();
                 }
               });
             }
-
-            print(rs.body);
-            // การส่งข้อมูลสำเร็จ
-            print('update profile successfully');
-            // Get.back();
-            // setState(() {});
-          } else if (rs.statusCode == 498) {
-            showCustomSnackBar('UPADTE PROFILE FAILED', 'Invalid token',
-                Colors.red, ContentType.failure);
-            _mainWrapperController.logOut();
-            // การส่งข้อมูลไม่สำเร็จ
-          } else {
-            print('Failed to update profile. Status code: ${rs.statusCode}');
-            print(rs.body);
           }
+          print(rs.body);
+          // การส่งข้อมูลสำเร็จ
+          print('update profile successfully');
+          // Get.back();
+          // setState(() {});
+        } else if (rs.statusCode == 498) {
+          showCustomSnackBar('UPADTE PROFILE FAILED', 'Invalid token',
+              Colors.red, ContentType.failure);
+          _mainWrapperController.logOut();
+
+          // การส่งข้อมูลไม่สำเร็จ
+        } else if (jsonRes['message'] == 'Please Checkband') {
+          print('error');
+          showCustomSnackBar('UPADTE PROFILE FAILED', 'Please Checkband',
+              Colors.red, ContentType.failure);
+
+          // การส่งข้อมูลไม่สำเร็จ
+        } else {
+          print('Failed to update profile. Status code: ${rs.statusCode}');
+          print(rs.body);
         }
       } catch (e) {
         // เกิดข้อผิดพลาดในการเชื่อมต่อ
@@ -768,7 +993,14 @@ class _EditProfileTabState extends State<EditProfileTab> {
                   setState(() {
                     _saving = false;
                   });
-                  loadDataBand();
+                  if (bandService.profileController.anotherProfileType.value ==
+                      "") {
+                    loadDataBand();
+                  } else if (bandService
+                          .profileController.anotherProfileType.value ==
+                      "band") {
+                    _loadDataAnotherProfileBand();
+                  }
                   Get.back();
                 }
               });
@@ -796,14 +1028,34 @@ class _EditProfileTabState extends State<EditProfileTab> {
     }
   }
 
-  _loadData() async {
+  Future _loadData() async {
     setState(() {}); // รีเรนเดอร์หน้าจอ
     await bandService.profileController.getProfile();
+    print("bandService.profileController.anotherProfileType.value");
+    print(bandService.profileController.anotherProfileType.value);
     print("bandService.profileController.profileList[0].userName");
     print(bandService.profileController.profileList[0].userName);
   }
 
-  loadDataBand() async {
+  Future _loadDataAnotherProfile() async {
+    setState(() {});
+    await bandService.profileController.getuserAnotherProfile();
+    print("bandService.profileController.anotherProfileType.value");
+    print(bandService.profileController.anotherProfileType.value);
+    print("bandService.profileController.useranotherprofile[0].userName");
+    print(bandService.profileController.useranotherprofile[0].userName);
+  }
+
+  Future _loadDataAnotherProfileBand() async {
+    setState(() {}); // รีเรนเดอร์หน้าจอ
+    await bandService.profileController.getbandAnotherprofile();
+    print("bandService.profileController.anotherProfileType.value");
+    print(bandService.profileController.anotherProfileType.value);
+    print("bandService.profileController.bandanotherprofile[0].bandName");
+    print(bandService.profileController.bandanotherprofile[0].bandName);
+  }
+
+  Future loadDataBand() async {
     setState(() {}); // รีเรนเดอร์หน้าจอ
     await bandService.bandsController.getBand();
     print("bandService.profileController.bandList[0].bandName");
